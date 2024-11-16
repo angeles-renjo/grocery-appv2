@@ -170,12 +170,10 @@ export const todoListStyles = StyleSheet.create({
 
   // List styles for the home screen
 
-  listContent: {
-    padding: 16,
-  },
-
   listInfo: {
     flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
     alignItems: "center",
   },
 
@@ -275,6 +273,7 @@ export const todoListStyles = StyleSheet.create({
   },
   listsContainer: {
     paddingBottom: 16,
+    gap: 12,
   },
   listContainer: {
     backgroundColor: "white",
@@ -288,12 +287,12 @@ export const todoListStyles = StyleSheet.create({
     elevation: 2,
   },
   listHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
     marginBottom: 8,
   },
-  listTitleContainer: {
+  Container: {
     flex: 1,
   },
   listTitle: {
@@ -303,6 +302,8 @@ export const todoListStyles = StyleSheet.create({
   listActions: {
     flexDirection: "row",
     alignItems: "center",
+    width: "100%",
+    justifyContent: "space-between",
   },
 });
 
