@@ -33,16 +33,12 @@ export const AnimatedList = ({ list, onDelete }: AnimatedListProps) => {
       exiting={FadeOut.duration(200)}
       style={styles.listContainer}
     >
-      <TouchableOpacity
-        style={styles.listContent}
-        onPress={handlePress}
-        activeOpacity={0.7}
-      >
+      <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
         <Animated.View
           entering={SlideInRight.duration(300)}
           style={styles.listHeader}
         >
-          <View style={styles.listTitleContainer}>
+          <View>
             <Text style={styles.listTitle}>{list.title}</Text>
             <View style={styles.listInfo}>
               <Text style={styles.itemCount}>

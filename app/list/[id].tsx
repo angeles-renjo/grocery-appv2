@@ -17,11 +17,13 @@ import { todoListStyles as styles } from "@/styles/todoList.styles";
 import { ListDatePicker } from "@/components/ListDatePicker";
 import { PriceEditModal } from "@/components/PriceEditModal";
 import { useTodoContext } from "@/hooks/useTodoContext";
+import { useToast } from "@/context/toast/ToastContext";
 
 export default function ListDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const navigation = useNavigation();
+  const { showToast } = useToast();
 
   const {
     state: { lists, loading },
@@ -33,7 +35,6 @@ export default function ListDetailScreen() {
   } = useTodoContext();
 
   const [newItemName, setNewItemName] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedItem, setSelectedItem] = useState<TodoItem | null>(null);
   const [showPriceModal, setShowPriceModal] = useState(false);
@@ -43,7 +44,7 @@ export default function ListDetailScreen() {
 
   useEffect(() => {
     if (!list && !loading) {
-      setError("List not found");
+      showToast("List not found", "error");
       router.back();
     }
   }, [list, loading]);
@@ -65,29 +66,27 @@ export default function ListDetailScreen() {
   }, [list]);
 
   const handleAddItem = async () => {
-    if (!newItemName.trim() || !list) return;
-
-    try {
-      // Add item with initial price of 0
-      await addItem(list.listId, newItemName.trim());
-      setNewItemName("");
-      setError(null);
-    } catch (err) {
-      setError("Failed to add item");
-      console.error(err);
+    if (!list) {
+      showToast("List not found", "error");
+      return;
     }
+
+    const trimmedName = newItemName.trim();
+    if (!trimmedName) {
+      showToast("Please enter an item name", "error");
+      return;
+    }
+
+    await addItem(list.listId, trimmedName);
+    setNewItemName("");
   };
-
   const handleDeleteItem = async (itemId: number) => {
-    if (!list) return;
-
-    try {
-      await deleteItem(list.listId, itemId);
-      setError(null);
-    } catch (err) {
-      setError("Failed to delete item");
-      console.error(err);
+    if (!list) {
+      showToast("List not found", "error");
+      return;
     }
+
+    await deleteItem(list.listId, itemId);
   };
 
   const handleDeleteList = () => {
@@ -100,58 +99,55 @@ export default function ListDetailScreen() {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
-            try {
-              if (list) {
-                await deleteList(list.listId);
-                router.back();
-              }
-            } catch (err) {
-              setError("Failed to delete list");
-              console.error(err);
+            if (!list) {
+              showToast("List not found", "error");
+              return;
             }
+
+            await deleteList(list.listId);
+            router.back();
           },
         },
       ]
     );
   };
-
   const handleUpdateDueDate = async (newDate: Date) => {
-    if (!list) return;
-
-    try {
-      await updateList(list.listId, { dueDate: newDate });
-      setError(null);
-    } catch (err) {
-      setError("Failed to update due date");
-      console.error(err);
+    if (!list) {
+      showToast("List not found", "error");
+      return;
     }
+
+    await updateList(list.listId, { dueDate: newDate });
   };
 
   const handleUpdatePrice = async (newPrice: number) => {
-    if (!list || !selectedItem) return;
-
-    try {
-      await updateItem(list.listId, selectedItem.itemId, {
-        price: newPrice,
-      });
-      setError(null);
-    } catch (err) {
-      setError("Failed to update price");
-      console.error(err);
+    if (!list || !selectedItem) {
+      showToast("Invalid selection", "error");
+      return;
     }
+
+    if (newPrice < 0) {
+      showToast("Price cannot be negative", "error");
+      return;
+    }
+
+    await updateItem(list.listId, selectedItem.itemId, {
+      price: newPrice,
+    });
+
+    setShowPriceModal(false);
+    setSelectedItem(null);
   };
 
   const toggleItemCompletion = async (item: TodoItem) => {
-    if (!list) return;
-
-    try {
-      await updateItem(list.listId, item.itemId, {
-        completed: !item.completed,
-      });
-    } catch (err) {
-      setError("Failed to update item");
-      console.error(err);
+    if (!list) {
+      showToast("List not found", "error");
+      return;
     }
+
+    await updateItem(list.listId, item.itemId, {
+      completed: !item.completed,
+    });
   };
 
   const handleItemPress = (item: TodoItem) => {
@@ -204,8 +200,8 @@ export default function ListDetailScreen() {
 
   if (!list) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>List not found</Text>
+      <View>
+        <Text>List not found</Text>
       </View>
     );
   }
@@ -215,12 +211,6 @@ export default function ListDetailScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      )}
-
       <View style={styles.listDetailHeader}>
         <TouchableOpacity
           style={styles.dueDateButton}
