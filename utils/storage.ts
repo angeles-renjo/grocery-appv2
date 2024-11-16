@@ -60,12 +60,12 @@ export class TodoStorage {
     }
   }
 
-  // Public methods used by context
   async getLists(): Promise<TodoList[]> {
     try {
       const { lists } = await this.getStorageData();
       return lists.map((list) => ({
         ...list,
+        total: list.items.reduce((sum, item) => sum + (item.price || 0), 0),
         dueDate: new Date(list.dueDate),
         createdAt: new Date(list.createdAt),
         updatedAt: new Date(list.updatedAt),
@@ -83,6 +83,7 @@ export class TodoStorage {
       listId: ListId.create().getValue(),
       title: params.title,
       items: [],
+      total: 0,
       dueDate: params.dueDate,
       createdAt: now,
       updatedAt: now,
@@ -93,7 +94,11 @@ export class TodoStorage {
     return newList;
   }
 
-  async addItem(params: { listId: number; name: string }): Promise<TodoItem> {
+  async addItem(params: {
+    listId: number;
+    name: string;
+    price?: number;
+  }): Promise<TodoItem> {
     const data = await this.getStorageData();
     const listIndex = data.lists.findIndex(
       (list) => list.listId === params.listId
@@ -107,12 +112,20 @@ export class TodoStorage {
     const newItem: TodoItem = {
       itemId: ItemId.create().getValue(),
       name: params.name,
+      price: params.price || 0,
       completed: false,
       createdAt: now,
       updatedAt: now,
     };
 
     data.lists[listIndex].items.push(newItem);
+    // Update list total
+    data.lists[listIndex].total = data.lists[listIndex].items.reduce(
+      (sum, item) => sum + (item.price || 0),
+      newItem.price || 0
+    );
+    data.lists[listIndex].updatedAt = now;
+
     await this.saveStorageData(data);
     return newItem;
   }
@@ -127,7 +140,17 @@ export class TodoStorage {
     const data = await this.getStorageData();
     const list = data.lists.find((l) => l.listId === params.listId);
     if (list) {
+      const itemToDelete = list.items.find(
+        (item) => item.itemId === params.itemId
+      );
       list.items = list.items.filter((item) => item.itemId !== params.itemId);
+      // Update list total
+      if (itemToDelete) {
+        list.total = list.items.reduce(
+          (sum, item) => sum + (item.price || 0),
+          0
+        );
+      }
       list.updatedAt = new Date();
       await this.saveStorageData(data);
     }
@@ -155,7 +178,19 @@ export class TodoStorage {
     if (list) {
       const item = list.items.find((i) => i.itemId === params.itemId);
       if (item) {
+        const oldPrice = item.price || 0;
         Object.assign(item, params.updates, { updatedAt: new Date() });
+        // Update list total if price changed
+        if (
+          params.updates.price !== undefined &&
+          params.updates.price !== oldPrice
+        ) {
+          list.total = list.items.reduce(
+            (sum, item) => sum + (item.price || 0),
+            0
+          );
+        }
+        list.updatedAt = new Date();
         await this.saveStorageData(data);
       }
     }

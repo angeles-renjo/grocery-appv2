@@ -15,6 +15,7 @@ import { AntDesign, Feather } from "@expo/vector-icons";
 import { TodoItem } from "@/utils/types";
 import { todoListStyles as styles } from "@/styles/todoList.styles";
 import { ListDatePicker } from "@/components/ListDatePicker";
+import { PriceEditModal } from "@/components/PriceEditModal";
 import { useTodoContext } from "@/hooks/useTodoContext";
 
 export default function ListDetailScreen() {
@@ -32,10 +33,10 @@ export default function ListDetailScreen() {
   } = useTodoContext();
 
   const [newItemName, setNewItemName] = useState("");
-  const [newItemPrice, setNewItemPrice] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [editingItem, setEditingItem] = useState<number | null>(null);
+  const [selectedItem, setSelectedItem] = useState<TodoItem | null>(null);
+  const [showPriceModal, setShowPriceModal] = useState(false);
 
   // Find the current list from context
   const list = lists.find((l) => l.listId === Number(id));
@@ -63,39 +64,16 @@ export default function ListDetailScreen() {
     }
   }, [list]);
 
-  const validatePrice = (price: string): boolean => {
-    const numPrice = parseFloat(price);
-    return !isNaN(numPrice) && numPrice >= 0;
-  };
-
   const handleAddItem = async () => {
     if (!newItemName.trim() || !list) return;
-    if (!validatePrice(newItemPrice)) {
-      setError("Please enter a valid price");
-      return;
-    }
 
     try {
-      await addItem(list.listId, newItemName.trim(), parseFloat(newItemPrice));
+      // Add item with initial price of 0
+      await addItem(list.listId, newItemName.trim(), 0);
       setNewItemName("");
-      setNewItemPrice("");
       setError(null);
     } catch (err) {
       setError("Failed to add item");
-      console.error(err);
-    }
-  };
-
-  const handleUpdateItemPrice = async (itemId: number, newPrice: string) => {
-    if (!list || !validatePrice(newPrice)) return;
-
-    try {
-      await updateItem(list.listId, itemId, {
-        price: parseFloat(newPrice),
-      });
-      setEditingItem(null);
-    } catch (err) {
-      setError("Failed to update price");
       console.error(err);
     }
   };
@@ -149,6 +127,20 @@ export default function ListDetailScreen() {
     }
   };
 
+  const handleUpdatePrice = async (newPrice: number) => {
+    if (!list || !selectedItem) return;
+
+    try {
+      await updateItem(list.listId, selectedItem.itemId, {
+        price: newPrice,
+      });
+      setError(null);
+    } catch (err) {
+      setError("Failed to update price");
+      console.error(err);
+    }
+  };
+
   const toggleItemCompletion = async (item: TodoItem) => {
     if (!list) return;
 
@@ -162,8 +154,17 @@ export default function ListDetailScreen() {
     }
   };
 
+  const handleItemPress = (item: TodoItem) => {
+    setSelectedItem(item);
+    setShowPriceModal(true);
+  };
+
   const renderItem = ({ item }: { item: TodoItem }) => (
-    <View style={styles.itemContainer}>
+    <TouchableOpacity
+      style={styles.itemContainer}
+      onPress={() => handleItemPress(item)}
+      activeOpacity={0.7}
+    >
       <TouchableOpacity
         onPress={() => toggleItemCompletion(item)}
         style={styles.itemCheckbox}
@@ -181,31 +182,7 @@ export default function ListDetailScreen() {
         >
           {item.name}
         </Text>
-
-        {editingItem === item.itemId ? (
-          <TextInput
-            style={styles.priceInput}
-            value={newItemPrice}
-            onChangeText={setNewItemPrice}
-            keyboardType="decimal-pad"
-            onBlur={() => {
-              handleUpdateItemPrice(item.itemId, newItemPrice);
-              setEditingItem(null);
-            }}
-            autoFocus
-          />
-        ) : (
-          <TouchableOpacity
-            onPress={() => {
-              setEditingItem(item.itemId);
-              setNewItemPrice(item.price?.toString() || "0");
-            }}
-          >
-            <Text style={styles.priceText}>
-              ${(item.price || 0).toFixed(2)}
-            </Text>
-          </TouchableOpacity>
-        )}
+        <Text style={styles.priceText}>${(item.price || 0).toFixed(2)}</Text>
       </View>
 
       <TouchableOpacity
@@ -214,7 +191,7 @@ export default function ListDetailScreen() {
       >
         <AntDesign name="delete" size={16} color="#FF4444" />
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   if (loading) {
@@ -271,16 +248,8 @@ export default function ListDetailScreen() {
           placeholder="Add new item..."
           value={newItemName}
           onChangeText={setNewItemName}
-          returnKeyType="next"
-        />
-        <TextInput
-          style={styles.addItemPriceInput}
-          placeholder="Price"
-          value={newItemPrice}
-          onChangeText={setNewItemPrice}
-          keyboardType="decimal-pad"
-          returnKeyType="done"
           onSubmitEditing={handleAddItem}
+          returnKeyType="done"
         />
         <TouchableOpacity onPress={handleAddItem} style={styles.addItemButton}>
           <AntDesign name="pluscircle" size={24} color="white" />
@@ -294,6 +263,17 @@ export default function ListDetailScreen() {
         onConfirm={(date) => {
           handleUpdateDueDate(date);
           setShowDatePicker(false);
+        }}
+      />
+
+      <PriceEditModal
+        visible={showPriceModal}
+        itemName={selectedItem?.name || ""}
+        currentPrice={selectedItem?.price || 0}
+        onConfirm={handleUpdatePrice}
+        onClose={() => {
+          setShowPriceModal(false);
+          setSelectedItem(null);
         }}
       />
     </KeyboardAvoidingView>
