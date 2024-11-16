@@ -34,25 +34,23 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <ToastProvider>
-          <TodoProvider>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="list/[id]"
-                options={{
-                  title: "List Details",
-                  headerShadowVisible: false,
-                }}
-              />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="auto" />
-          </TodoProvider>
-        </ToastProvider>
-      </ThemeProvider>
-    </SafeAreaView>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <ToastProvider>
+        <TodoProvider>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="list/[id]"
+              options={{
+                title: "List Details",
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </TodoProvider>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }
