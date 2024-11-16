@@ -1,5 +1,4 @@
-// components/TodoListCreator.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,339 +6,271 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  Alert,
+  Vibration,
+  Animated,
+  Keyboard,
   Platform,
-  Modal,
-  TouchableWithoutFeedback,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { AntDesign, Feather } from "@expo/vector-icons";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
-import { TodoStorage } from "../utils/storage";
-import { TodoList, TodoItem } from "../utils/types";
-import { todoListStyles as styles } from "../styles/todoList.styles";
+import * as Haptics from "expo-haptics";
+import { TodoList } from "@/utils/types";
+import { todoListStyles as styles } from "@/styles/todoList.styles";
+import { ListDatePicker } from "./ListDatePicker";
+import { useTodoContext } from "@/hooks/useTodoContext";
 
-const TodoListCreator = () => {
-  const [lists, setLists] = useState<TodoList[]>([]);
+// Add a custom Error type
+type TodoError = {
+  message: string;
+  type: "error" | "warning" | "success";
+  id: number;
+};
+
+export default function TodoListCreator() {
+  const router = useRouter();
+  const {
+    state: { lists, loading },
+    addList,
+    deleteList,
+  } = useTodoContext();
+
   const [newListTitle, setNewListTitle] = useState("");
-  const [newItemName, setNewItemName] = useState("");
-  const [selectedListId, setSelectedListId] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [errors, setErrors] = useState<TodoError[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [datePickerListId, setDatePickerListId] = useState<number | null>(null);
 
-  const storage = TodoStorage.getInstance();
+  // Animation states
+  const [fadeAnim] = useState(new Animated.Value(1));
+  const [shakeAnim] = useState(new Animated.Value(0));
+  const [createButtonScale] = useState(new Animated.Value(1));
 
-  useEffect(() => {
-    loadLists();
-  }, []);
-
-  const loadLists = async () => {
-    try {
-      setLoading(true);
-      const loadedLists = await storage.getLists();
-      setLists(loadedLists);
-      setError(null);
-    } catch (err) {
-      setError("Failed to load lists");
-      console.error(err);
-    } finally {
-      setLoading(false);
+  // Auto-dismiss errors after 3 seconds
+  React.useEffect(() => {
+    if (errors.length > 0) {
+      const timer = setTimeout(() => {
+        setErrors((prev) => prev.slice(1));
+      }, 3000);
+      return () => clearTimeout(timer);
     }
+  }, [errors]);
+
+  const showError = (message: string, type: TodoError["type"] = "error") => {
+    const newError: TodoError = {
+      message,
+      type,
+      id: Date.now(),
+    };
+    setErrors((prev) => [...prev, newError]);
+
+    // Provide haptic feedback based on error type
+    if (Platform.OS === "ios") {
+      switch (type) {
+        case "error":
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          break;
+        case "success":
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          break;
+        case "warning":
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          break;
+      }
+    } else {
+      Vibration.vibrate(200);
+    }
+  };
+
+  const validateListTitle = (title: string): boolean => {
+    if (!title.trim()) {
+      showError("Please enter a list title", "warning");
+      shakeInput();
+      return false;
+    }
+    if (title.length > 50) {
+      showError("List title is too long (max 50 characters)", "warning");
+      return false;
+    }
+    if (
+      lists.some((list) => list.title.toLowerCase() === title.toLowerCase())
+    ) {
+      showError("A list with this name already exists", "warning");
+      return false;
+    }
+    return true;
+  };
+
+  const shakeInput = () => {
+    Animated.sequence([
+      Animated.timing(shakeAnim, {
+        toValue: 10,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: -10,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnim, {
+        toValue: 0,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
   };
 
   const handleCreateList = async () => {
-    if (!newListTitle.trim()) return;
+    if (!validateListTitle(newListTitle)) return;
 
     try {
-      const newList = await storage.addList({
-        title: newListTitle.trim(),
-        dueDate: selectedDate,
-      });
-      setLists((prev) => [...prev, newList]);
+      Keyboard.dismiss();
+      // Animate button press
+      Animated.sequence([
+        Animated.timing(createButtonScale, {
+          toValue: 0.9,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(createButtonScale, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      await addList(newListTitle.trim(), selectedDate);
       setNewListTitle("");
       setSelectedDate(new Date());
-      setError(null);
+      showError("List created successfully", "success");
     } catch (err) {
-      setError("Failed to create list");
+      showError("Failed to create list");
       console.error(err);
     }
   };
 
-  const handleDateChange = async (event: DateTimePickerEvent, date?: Date) => {
-    if (Platform.OS === "android") {
-      setShowDatePicker(false);
-    }
-
-    if (event.type === "set" && date) {
-      setSelectedDate(date);
-
-      if (datePickerListId) {
-        try {
-          await storage.updateList({
-            listId: datePickerListId,
-            updates: { dueDate: date },
-          });
-
-          setLists((prev) =>
-            prev.map((list) =>
-              list.listId === datePickerListId
-                ? { ...list, dueDate: date }
-                : list
-            )
-          );
-        } catch (err) {
-          setError("Failed to update due date");
-          console.error(err);
-        }
-      }
-    }
-  };
-
-  const handleAddItem = async () => {
-    if (!selectedListId || !newItemName.trim()) return;
-
-    try {
-      const newItem = await storage.addItem({
-        listId: selectedListId,
-        name: newItemName.trim(),
-      });
-
-      setLists((prev) =>
-        prev.map((list) =>
-          list.listId === selectedListId
-            ? { ...list, items: [...list.items, newItem] }
-            : list
-        )
-      );
-      setNewItemName("");
-      setError(null);
-    } catch (err) {
-      setError("Failed to add item");
-      console.error(err);
-    }
-  };
-
-  const handleDeleteList = async (listId: number) => {
-    try {
-      await storage.deleteList(listId);
-      setLists((prev) => prev.filter((list) => list.listId !== listId));
-      if (selectedListId === listId) {
-        setSelectedListId(null);
-      }
-      setError(null);
-    } catch (err) {
-      setError("Failed to delete list");
-      console.error(err);
-    }
-  };
-
-  const handleDeleteItem = async (listId: number, itemId: number) => {
-    try {
-      await storage.deleteItem({ listId, itemId });
-      setLists((prev) =>
-        prev.map((list) =>
-          list.listId === listId
-            ? {
-                ...list,
-                items: list.items.filter((item) => item.itemId !== itemId),
-              }
-            : list
-        )
-      );
-      setError(null);
-    } catch (err) {
-      setError("Failed to delete item");
-      console.error(err);
-    }
-  };
-
-  const showDatePickerModal = (listId?: number) => {
-    if (listId) {
-      const list = lists.find((l) => l.listId === listId);
-      if (list) {
-        setSelectedDate(new Date(list.dueDate));
-      }
-      setDatePickerListId(listId);
-    } else {
-      setDatePickerListId(null);
-    }
-    setShowDatePicker(true);
-  };
-
-  // Inside TodoListCreator.tsx, update the DatePicker modal render function:
-
-  const renderDatePicker = () => {
-    if (Platform.OS === "ios") {
-      return (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={showDatePicker}
-          onRequestClose={() => setShowDatePicker(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setShowDatePicker(false)}>
-            <View style={styles.modalOverlay}>
-              <TouchableWithoutFeedback>
-                <View style={styles.modalContent}>
-                  <View style={styles.datePickerHeader}>
-                    <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                      <Text style={styles.datePickerButton}>Cancel</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        // Create a proper DateTimePickerEvent with utcOffset
-                        const event: DateTimePickerEvent = {
-                          type: "set",
-                          nativeEvent: {
-                            timestamp: selectedDate.getTime(),
-                            utcOffset: selectedDate.getTimezoneOffset() * -1,
-                          },
-                        };
-                        handleDateChange(event, selectedDate);
-                        setShowDatePicker(false);
-                      }}
-                    >
-                      <Text
-                        style={[
-                          styles.datePickerButton,
-                          styles.datePickerDoneButton,
-                        ]}
-                      >
-                        Done
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  <DateTimePicker
-                    value={selectedDate}
-                    mode="date"
-                    display="spinner"
-                    onChange={handleDateChange}
-                    style={styles.datePickerIOS}
-                  />
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-      );
-    }
-
-    return (
-      showDatePicker && (
-        <DateTimePicker
-          value={selectedDate}
-          mode="date"
-          display="default"
-          onChange={handleDateChange}
-        />
-      )
-    );
+  const handleDeleteList = (listId: number) => {
+    Alert.alert("Delete List", "Are you sure you want to delete this list?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await deleteList(listId);
+            showError("List deleted", "success");
+          } catch (err) {
+            showError("Failed to delete list");
+            console.error(err);
+          }
+        },
+      },
+    ]);
   };
 
   const renderList = ({ item: list }: { item: TodoList }) => (
-    <View style={styles.listContainer}>
-      <View style={styles.listHeader}>
-        <TouchableOpacity
-          onPress={() =>
-            setSelectedListId(
-              list.listId === selectedListId ? null : list.listId
-            )
-          }
-          style={styles.listTitleContainer}
-        >
-          <Text style={styles.listTitle}>{list.title}</Text>
-        </TouchableOpacity>
-        <View style={styles.listActions}>
-          <TouchableOpacity
-            onPress={() => showDatePickerModal(list.listId)}
-            style={styles.dateButton}
-          >
-            <Feather
-              name="calendar"
-              size={16}
-              color="#666"
-              style={styles.calendarIcon}
-            />
+    <Animated.View style={[styles.listContainer, { opacity: fadeAnim }]}>
+      <TouchableOpacity
+        style={styles.listContent}
+        onPress={() => router.push(`/list/${list.listId}`)}
+        activeOpacity={0.7}
+      >
+        <View style={styles.listHeader}>
+          <View style={styles.listTitleContainer}>
+            <Text style={styles.listTitle}>{list.title}</Text>
+            <Text style={styles.itemCount}>
+              {list.items.length} {list.items.length === 1 ? "item" : "items"}
+            </Text>
+          </View>
+          <View style={styles.listActions}>
             <Text style={styles.dateText}>
               {new Date(list.dueDate).toLocaleDateString()}
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleDeleteList(list.listId)}
-            style={styles.deleteButton}
-          >
-            <AntDesign name="delete" size={18} color="#FF4444" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {selectedListId === list.listId && (
-        <View style={styles.itemsContainer}>
-          <View style={styles.addItemContainer}>
-            <TextInput
-              style={styles.addItemInput}
-              placeholder="Add new item..."
-              value={newItemName}
-              onChangeText={setNewItemName}
-              onSubmitEditing={handleAddItem}
-            />
             <TouchableOpacity
-              onPress={handleAddItem}
-              style={styles.addItemButton}
+              onPress={(e) => {
+                e.stopPropagation();
+                handleDeleteList(list.listId);
+              }}
+              style={styles.deleteButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <AntDesign name="pluscircle" size={24} color="white" />
+              <AntDesign name="delete" size={18} color="#FF4444" />
             </TouchableOpacity>
           </View>
-
-          <FlatList
-            data={list.items}
-            keyExtractor={(item) => item.itemId.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.itemContainer}>
-                <Text style={styles.itemText}>{item.name}</Text>
-                <TouchableOpacity
-                  onPress={() => handleDeleteItem(list.listId, item.itemId)}
-                  style={styles.deleteItemButton}
-                >
-                  <AntDesign name="delete" size={16} color="#FF4444" />
-                </TouchableOpacity>
-              </View>
-            )}
-          />
         </View>
-      )}
-    </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+
+  const ErrorNotification = ({ error }: { error: TodoError }) => (
+    <Animated.View
+      style={[
+        styles.errorContainer,
+        {
+          backgroundColor:
+            error.type === "error"
+              ? "#FFE5E5"
+              : error.type === "warning"
+              ? "#FFF3E0"
+              : "#E8F5E9",
+        },
+      ]}
+    >
+      <Text
+        style={[
+          styles.errorText,
+          {
+            color:
+              error.type === "error"
+                ? "#D32F2F"
+                : error.type === "warning"
+                ? "#EF6C00"
+                : "#2E7D32",
+          },
+        ]}
+      >
+        {error.message}
+      </Text>
+    </Animated.View>
   );
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#0000ff" />
+        <Text style={styles.loadingText}>Loading your lists...</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      )}
+      {errors.map((error) => (
+        <ErrorNotification key={error.id} error={error} />
+      ))}
 
-      <View style={styles.createListContainer}>
+      <Animated.View
+        style={[
+          styles.createListContainer,
+          { transform: [{ translateX: shakeAnim }] },
+        ]}
+      >
         <View style={styles.createListInputContainer}>
           <TextInput
             style={styles.createListInput}
             placeholder="New list title..."
             value={newListTitle}
             onChangeText={setNewListTitle}
+            maxLength={50}
+            returnKeyType="done"
+            onSubmitEditing={handleCreateList}
           />
           <TouchableOpacity
-            onPress={() => showDatePickerModal()}
+            onPress={() => setShowDatePicker(true)}
             style={styles.createListDateButton}
           >
             <Feather name="calendar" size={20} color="#666" />
@@ -348,24 +279,42 @@ const TodoListCreator = () => {
             </Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          onPress={handleCreateList}
-          style={styles.createListButton}
-        >
-          <AntDesign name="pluscircle" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
+        <Animated.View style={{ transform: [{ scale: createButtonScale }] }}>
+          <TouchableOpacity
+            onPress={handleCreateList}
+            style={styles.createListButton}
+            activeOpacity={0.7}
+          >
+            <AntDesign name="pluscircle" size={24} color="white" />
+          </TouchableOpacity>
+        </Animated.View>
+      </Animated.View>
 
       <FlatList
         data={lists}
         renderItem={renderList}
         keyExtractor={(list) => list.listId.toString()}
         style={styles.listsList}
+        refreshing={refreshing}
+        onRefresh={() => {
+          setRefreshing(true);
+          useTodoContext()
+            .loadLists()
+            .finally(() => setRefreshing(false));
+        }}
+        contentContainerStyle={styles.listsContainer}
+        showsVerticalScrollIndicator={false}
       />
 
-      {renderDatePicker()}
+      <ListDatePicker
+        visible={showDatePicker}
+        date={selectedDate}
+        onClose={() => setShowDatePicker(false)}
+        onConfirm={(date) => {
+          setSelectedDate(date);
+          setShowDatePicker(false);
+        }}
+      />
     </View>
   );
-};
-
-export default TodoListCreator;
+}

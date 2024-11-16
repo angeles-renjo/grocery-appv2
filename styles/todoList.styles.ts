@@ -7,19 +7,26 @@ export const todoListStyles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
     padding: 16,
   },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: "#666",
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
   errorContainer: {
-    backgroundColor: "#ffebee",
+    margin: 8,
     padding: 12,
     borderRadius: 8,
-    marginBottom: 16,
+    flexDirection: "row",
+    alignItems: "center",
   },
   errorText: {
-    color: "#c62828",
+    flex: 1,
+    fontSize: 14,
   },
   // Create List Section
   createListContainer: {
@@ -61,6 +68,9 @@ export const todoListStyles = StyleSheet.create({
   // List Section
   listsList: {
     flex: 1,
+  },
+  listsContainer: {
+    paddingBottom: 16,
   },
   listContainer: {
     backgroundColor: "white",
@@ -174,5 +184,67 @@ export const todoListStyles = StyleSheet.create({
   },
   datePickerIOS: {
     height: 200,
+  },
+  listDetailHeader: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+  },
+  listDetailTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  listDetailDate: {
+    fontSize: 16,
+    color: "#666",
+  },
+  itemCount: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 4,
+  },
+
+  dueDateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    alignSelf: "flex-start",
+  },
+  dueDateText: {
+    marginLeft: 8,
+    color: "#666",
+    fontSize: 16,
+  },
+  itemsList: {
+    flex: 1,
+  },
+  itemsListContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  listContent: {
+    flex: 1,
+  },
+  itemCheckbox: {
+    marginRight: 12,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#2196F3",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: "#2196F3",
+  },
+  itemTextCompleted: {
+    textDecorationLine: "line-through",
+    color: "#999",
   },
 });
