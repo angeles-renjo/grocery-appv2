@@ -28,6 +28,8 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         state,
         ...actions,
+        updateList: actions.updateList,
+        updateItem: actions.updateItem,
       }}
     >
       {children}
