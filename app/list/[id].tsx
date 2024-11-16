@@ -69,7 +69,7 @@ export default function ListDetailScreen() {
 
     try {
       // Add item with initial price of 0
-      await addItem(list.listId, newItemName.trim(), 0);
+      await addItem(list.listId, newItemName.trim());
       setNewItemName("");
       setError(null);
     } catch (err) {

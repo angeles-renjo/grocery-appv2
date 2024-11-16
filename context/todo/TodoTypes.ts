@@ -1,11 +1,4 @@
-import { TodoList, TodoItem } from "../../utils/types";
-
-export interface TodoState {
-  lists: TodoList[];
-  loading: boolean;
-  error: string | null;
-  grandTotal: number;
-}
+import { TodoList, TodoItem, TodoState } from "../../utils/types";
 
 export type TodoAction =
   | { type: "SET_LISTS"; payload: TodoList[] }
@@ -30,7 +23,7 @@ export interface TodoContextType {
   addList: (title: string, dueDate: Date) => Promise<void>;
   updateList: (listId: number, updates: Partial<TodoList>) => Promise<void>;
   deleteList: (listId: number) => Promise<void>;
-  addItem: (listId: number, name: string, price: number) => Promise<void>;
+  addItem: (listId: number, name: string) => Promise<void>;
   updateItem: (
     listId: number,
     itemId: number,

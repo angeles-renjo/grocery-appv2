@@ -1,11 +1,11 @@
-// context/todo/TodoContext.tsx
+// TodoContext.tsx
 import React, { createContext, useReducer, useEffect, useContext } from "react";
 import { TodoContextType } from "./TodoTypes";
 import { todoReducer, initialState } from "./TodoReducer";
 import { createTodoActions } from "./TodoActions";
 import { TodoStorage } from "../../utils/storage";
 import { useToast } from "../toast/ToastContext";
-import { TodoState } from "@/utils/types";
+import { TodoList, TodoItem } from "../../utils/types";
 
 export const TodoContext = createContext<TodoContextType | undefined>(
   undefined
@@ -18,7 +18,44 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({
   const storage = TodoStorage.getInstance();
   const toast = useToast();
 
-  const actions = createTodoActions(dispatch, storage, toast);
+  // Create actions with void return types
+  const actions = {
+    loadLists: async () => {
+      await createTodoActions(dispatch, storage, toast).loadLists();
+    },
+    addList: async (title: string, dueDate: Date) => {
+      await createTodoActions(dispatch, storage, toast).addList(title, dueDate);
+    },
+    updateList: async (listId: number, updates: Partial<TodoList>) => {
+      await createTodoActions(dispatch, storage, toast).updateList(
+        listId,
+        updates
+      );
+    },
+    deleteList: async (listId: number) => {
+      await createTodoActions(dispatch, storage, toast).deleteList(listId);
+    },
+    addItem: async (listId: number, name: string) => {
+      await createTodoActions(dispatch, storage, toast).addItem(listId, name);
+    },
+    updateItem: async (
+      listId: number,
+      itemId: number,
+      updates: Partial<TodoItem>
+    ) => {
+      await createTodoActions(dispatch, storage, toast).updateItem(
+        listId,
+        itemId,
+        updates
+      );
+    },
+    deleteItem: async (listId: number, itemId: number) => {
+      await createTodoActions(dispatch, storage, toast).deleteItem(
+        listId,
+        itemId
+      );
+    },
+  };
 
   useEffect(() => {
     actions.loadLists();
@@ -29,8 +66,6 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         state,
         ...actions,
-        updateList: actions.updateList,
-        updateItem: actions.updateItem,
       }}
     >
       {children}
