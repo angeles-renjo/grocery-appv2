@@ -1,10 +1,10 @@
-// context/todo/TodoTypes.ts
 import { TodoList, TodoItem } from "../../utils/types";
 
 export interface TodoState {
   lists: TodoList[];
   loading: boolean;
   error: string | null;
+  grandTotal: number;
 }
 
 export type TodoAction =
@@ -30,7 +30,7 @@ export interface TodoContextType {
   addList: (title: string, dueDate: Date) => Promise<void>;
   updateList: (listId: number, updates: Partial<TodoList>) => Promise<void>;
   deleteList: (listId: number) => Promise<void>;
-  addItem: (listId: number, name: string) => Promise<void>;
+  addItem: (listId: number, name: string, price: number) => Promise<void>;
   updateItem: (
     listId: number,
     itemId: number,

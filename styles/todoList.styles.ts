@@ -130,25 +130,13 @@ export const todoListStyles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
   },
-  addItemInput: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-    padding: 12,
-    marginRight: 8,
-  },
+
   addItemButton: {
     backgroundColor: "#2196F3",
     borderRadius: 8,
     padding: 8,
   },
-  itemContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
+
   itemText: {
     flex: 1,
     fontSize: 16,
@@ -246,5 +234,97 @@ export const todoListStyles = StyleSheet.create({
   itemTextCompleted: {
     textDecorationLine: "line-through",
     color: "#999",
+  },
+  listTotal: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginTop: 16,
+  },
+  listTotalText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginTop: 16,
+  },
+  listInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  grandTotalLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginRight: 8,
+  },
+  grandTotalAmount: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  grandTotalContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  totalText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginLeft: 16,
+  },
+
+  itemContent: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginRight: 8,
+  },
+
+  priceText: {
+    fontSize: 16,
+    color: "#666",
+    minWidth: 60,
+    textAlign: "right",
+  },
+
+  priceInput: {
+    fontSize: 16,
+    color: "#333",
+    minWidth: 60,
+    textAlign: "right",
+    borderBottomWidth: 1,
+    borderBottomColor: "#0066FF",
+    paddingVertical: 2,
+  },
+
+  addItemPriceInput: {
+    width: 80,
+    height: 40,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginLeft: 8,
+    fontSize: 16,
+  },
+
+  addItemInput: {
+    flex: 1,
+    height: 40,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontSize: 16,
+  },
+
+  itemContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
 });

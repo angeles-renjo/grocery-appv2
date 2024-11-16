@@ -1,9 +1,9 @@
 // utils/types.ts
-
 export interface TodoItem {
   itemId: number;
   name: string;
   completed: boolean;
+  price: number; // New field
   createdAt: Date;
   updatedAt: Date;
 }
@@ -12,6 +12,7 @@ export interface TodoList {
   listId: number;
   title: string;
   items: TodoItem[];
+  total: number; // New field
   dueDate: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -84,4 +85,11 @@ export type ToastAction =
 export interface ToastContextType {
   showToast: (message: string, type: ToastType, duration?: number) => void;
   hideToast: (id: string) => void;
+}
+
+export interface TodoState {
+  lists: TodoList[];
+  loading: boolean;
+  error: string | null;
+  grandTotal: number;
 }

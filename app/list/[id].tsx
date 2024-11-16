@@ -7,6 +7,8 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { AntDesign, Feather } from "@expo/vector-icons";
@@ -30,8 +32,10 @@ export default function ListDetailScreen() {
   } = useTodoContext();
 
   const [newItemName, setNewItemName] = useState("");
+  const [newItemPrice, setNewItemPrice] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [editingItem, setEditingItem] = useState<number | null>(null);
 
   // Find the current list from context
   const list = lists.find((l) => l.listId === Number(id));
@@ -59,15 +63,39 @@ export default function ListDetailScreen() {
     }
   }, [list]);
 
+  const validatePrice = (price: string): boolean => {
+    const numPrice = parseFloat(price);
+    return !isNaN(numPrice) && numPrice >= 0;
+  };
+
   const handleAddItem = async () => {
     if (!newItemName.trim() || !list) return;
+    if (!validatePrice(newItemPrice)) {
+      setError("Please enter a valid price");
+      return;
+    }
 
     try {
-      await addItem(list.listId, newItemName.trim());
+      await addItem(list.listId, newItemName.trim(), parseFloat(newItemPrice));
       setNewItemName("");
+      setNewItemPrice("");
       setError(null);
     } catch (err) {
       setError("Failed to add item");
+      console.error(err);
+    }
+  };
+
+  const handleUpdateItemPrice = async (itemId: number, newPrice: string) => {
+    if (!list || !validatePrice(newPrice)) return;
+
+    try {
+      await updateItem(list.listId, itemId, {
+        price: parseFloat(newPrice),
+      });
+      setEditingItem(null);
+    } catch (err) {
+      setError("Failed to update price");
       console.error(err);
     }
   };
@@ -89,10 +117,7 @@ export default function ListDetailScreen() {
       "Delete List",
       "Are you sure you want to delete this list? This action cannot be undone.",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
@@ -149,11 +174,40 @@ export default function ListDetailScreen() {
           {item.completed && <AntDesign name="check" size={16} color="white" />}
         </View>
       </TouchableOpacity>
-      <Text
-        style={[styles.itemText, item.completed && styles.itemTextCompleted]}
-      >
-        {item.name}
-      </Text>
+
+      <View style={styles.itemContent}>
+        <Text
+          style={[styles.itemText, item.completed && styles.itemTextCompleted]}
+        >
+          {item.name}
+        </Text>
+
+        {editingItem === item.itemId ? (
+          <TextInput
+            style={styles.priceInput}
+            value={newItemPrice}
+            onChangeText={setNewItemPrice}
+            keyboardType="decimal-pad"
+            onBlur={() => {
+              handleUpdateItemPrice(item.itemId, newItemPrice);
+              setEditingItem(null);
+            }}
+            autoFocus
+          />
+        ) : (
+          <TouchableOpacity
+            onPress={() => {
+              setEditingItem(item.itemId);
+              setNewItemPrice(item.price?.toString() || "0");
+            }}
+          >
+            <Text style={styles.priceText}>
+              ${(item.price || 0).toFixed(2)}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
       <TouchableOpacity
         onPress={() => handleDeleteItem(item.itemId)}
         style={styles.deleteItemButton}
@@ -180,7 +234,10 @@ export default function ListDetailScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
       {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
@@ -197,20 +254,7 @@ export default function ListDetailScreen() {
             Due: {new Date(list.dueDate).toLocaleDateString()}
           </Text>
         </TouchableOpacity>
-      </View>
-
-      <View style={styles.addItemContainer}>
-        <TextInput
-          style={styles.addItemInput}
-          placeholder="Add new item..."
-          value={newItemName}
-          onChangeText={setNewItemName}
-          onSubmitEditing={handleAddItem}
-          returnKeyType="done"
-        />
-        <TouchableOpacity onPress={handleAddItem} style={styles.addItemButton}>
-          <AntDesign name="pluscircle" size={24} color="white" />
-        </TouchableOpacity>
+        <Text style={styles.totalText}>Total: ${list.total.toFixed(2)}</Text>
       </View>
 
       <FlatList
@@ -221,6 +265,28 @@ export default function ListDetailScreen() {
         contentContainerStyle={styles.itemsListContent}
       />
 
+      <View style={styles.addItemContainer}>
+        <TextInput
+          style={styles.addItemInput}
+          placeholder="Add new item..."
+          value={newItemName}
+          onChangeText={setNewItemName}
+          returnKeyType="next"
+        />
+        <TextInput
+          style={styles.addItemPriceInput}
+          placeholder="Price"
+          value={newItemPrice}
+          onChangeText={setNewItemPrice}
+          keyboardType="decimal-pad"
+          returnKeyType="done"
+          onSubmitEditing={handleAddItem}
+        />
+        <TouchableOpacity onPress={handleAddItem} style={styles.addItemButton}>
+          <AntDesign name="pluscircle" size={24} color="white" />
+        </TouchableOpacity>
+      </View>
+
       <ListDatePicker
         visible={showDatePicker}
         date={new Date(list.dueDate)}
@@ -230,6 +296,6 @@ export default function ListDetailScreen() {
           setShowDatePicker(false);
         }}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }

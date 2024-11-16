@@ -1,10 +1,11 @@
 // context/todo/TodoContext.tsx
 import React, { createContext, useReducer, useEffect, useContext } from "react";
-import { TodoContextType, TodoState } from "./TodoTypes";
+import { TodoContextType } from "./TodoTypes";
 import { todoReducer, initialState } from "./TodoReducer";
 import { createTodoActions } from "./TodoActions";
 import { TodoStorage } from "../../utils/storage";
 import { useToast } from "../toast/ToastContext";
+import { TodoState } from "@/utils/types";
 
 export const TodoContext = createContext<TodoContextType | undefined>(
   undefined

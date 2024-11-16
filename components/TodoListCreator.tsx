@@ -31,7 +31,7 @@ import { AnimatedList } from "@/components/AnimatedList";
 export default function TodoListCreator() {
   const router = useRouter();
   const {
-    state: { lists, loading },
+    state: { lists, loading, grandTotal },
     addList,
     deleteList,
     loadLists,
@@ -143,6 +143,10 @@ export default function TodoListCreator() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.grandTotalContainer}>
+        <Text style={styles.grandTotalLabel}>Grand Total:</Text>
+        <Text style={styles.grandTotalAmount}>${grandTotal.toFixed(2)}</Text>
+      </View>
       <Animated.View style={[styles.createListContainer, createContainerStyle]}>
         <View style={styles.createListInputContainer}>
           <TextInput
