@@ -1,4 +1,5 @@
-// types.ts
+// utils/types.ts
+
 export interface TodoItem {
   itemId: number;
   name: string;
@@ -16,19 +17,20 @@ export interface TodoList {
   updatedAt: Date;
 }
 
+// Storage Types
 export interface StorageData {
   lists: TodoList[];
   version: number;
 }
 
-// Enums to replace string literals
+// Storage Enums
 export enum StorageKeys {
   ROOT = "@TodoApp",
   LISTS = "@TodoApp:lists",
   SETTINGS = "@TodoApp:settings",
 }
 
-// Value objects to address primitive obsession
+// Value Objects
 export class ListId {
   private constructor(private value: number) {}
 
@@ -59,4 +61,27 @@ export class ItemId {
   getValue(): number {
     return this.value;
   }
+}
+
+// Toast Types
+export type ToastType = "success" | "error" | "info" | "warning";
+
+export interface Toast {
+  id: string;
+  message: string;
+  type: ToastType;
+  duration?: number;
+}
+
+export interface ToastState {
+  toasts: Toast[];
+}
+
+export type ToastAction =
+  | { type: "ADD_TOAST"; payload: Toast }
+  | { type: "REMOVE_TOAST"; payload: string };
+
+export interface ToastContextType {
+  showToast: (message: string, type: ToastType, duration?: number) => void;
+  hideToast: (id: string) => void;
 }

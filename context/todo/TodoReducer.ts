@@ -1,20 +1,28 @@
+// context/todo/TodoReducer.ts
 import { TodoState, TodoAction } from "./TodoTypes";
 
-// Initial state
 export const initialState: TodoState = {
   lists: [],
   loading: false,
   error: null,
 };
 
-// Reducer
-export function todoReducer(state: TodoState, action: TodoAction): TodoState {
+export const todoReducer = (
+  state: TodoState,
+  action: TodoAction
+): TodoState => {
   switch (action.type) {
     case "SET_LISTS":
-      return { ...state, lists: action.payload };
+      return {
+        ...state,
+        lists: action.payload,
+      };
 
     case "ADD_LIST":
-      return { ...state, lists: [...state.lists, action.payload] };
+      return {
+        ...state,
+        lists: [...state.lists, action.payload],
+      };
 
     case "UPDATE_LIST":
       return {
@@ -75,12 +83,18 @@ export function todoReducer(state: TodoState, action: TodoAction): TodoState {
       };
 
     case "SET_LOADING":
-      return { ...state, loading: action.payload };
+      return {
+        ...state,
+        loading: action.payload,
+      };
 
     case "SET_ERROR":
-      return { ...state, error: action.payload };
+      return {
+        ...state,
+        error: action.payload,
+      };
 
     default:
       return state;
   }
-}
+};

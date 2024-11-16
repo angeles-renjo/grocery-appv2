@@ -1,4 +1,3 @@
-// storage.ts
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   StorageKeys,
@@ -61,21 +60,7 @@ export class TodoStorage {
     }
   }
 
-  async initialize(): Promise<void> {
-    try {
-      const existingData = await AsyncStorage.getItem(StorageKeys.ROOT);
-      if (!existingData) {
-        await this.saveStorageData(this.defaultData);
-      }
-    } catch (error) {
-      throw new StorageError(
-        "Failed to initialize storage",
-        "initialize",
-        error as Error
-      );
-    }
-  }
-
+  // Public methods used by context
   async getLists(): Promise<TodoList[]> {
     try {
       const { lists } = await this.getStorageData();
@@ -91,97 +76,73 @@ export class TodoStorage {
   }
 
   async addList(params: { title: string; dueDate: Date }): Promise<TodoList> {
-    try {
-      const data = await this.getStorageData();
-      const now = new Date();
+    const data = await this.getStorageData();
+    const now = new Date();
 
-      const newList: TodoList = {
-        listId: ListId.create().getValue(),
-        title: params.title,
-        items: [],
-        dueDate: params.dueDate,
-        createdAt: now,
-        updatedAt: now,
-      };
+    const newList: TodoList = {
+      listId: ListId.create().getValue(),
+      title: params.title,
+      items: [],
+      dueDate: params.dueDate,
+      createdAt: now,
+      updatedAt: now,
+    };
 
-      data.lists.push(newList);
-      await this.saveStorageData(data);
-      return newList;
-    } catch (error) {
-      throw new StorageError("Failed to add list", "addList", error as Error);
-    }
+    data.lists.push(newList);
+    await this.saveStorageData(data);
+    return newList;
   }
 
   async addItem(params: { listId: number; name: string }): Promise<TodoItem> {
-    try {
-      const data = await this.getStorageData();
-      const listIndex = data.lists.findIndex(
-        (list) => list.listId === params.listId
-      );
+    const data = await this.getStorageData();
+    const listIndex = data.lists.findIndex(
+      (list) => list.listId === params.listId
+    );
 
-      if (listIndex === -1) {
-        throw new Error(`List with id ${params.listId} not found`);
-      }
-
-      const now = new Date();
-      const newItem: TodoItem = {
-        itemId: ItemId.create().getValue(),
-        name: params.name,
-        completed: false,
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      data.lists[listIndex].items.push(newItem);
-      await this.saveStorageData(data);
-      return newItem;
-    } catch (error) {
-      throw new StorageError("Failed to add item", "addItem", error as Error);
+    if (listIndex === -1) {
+      throw new Error(`List with id ${params.listId} not found`);
     }
-  }
 
-  private async updateStorageData(
-    operation: (data: StorageData) => Promise<void> | void
-  ): Promise<void> {
-    try {
-      const data = await this.getStorageData();
-      await operation(data);
-      await this.saveStorageData(data);
-    } catch (error) {
-      throw new StorageError(
-        "Failed to update storage data",
-        "updateStorageData",
-        error as Error
-      );
-    }
+    const now = new Date();
+    const newItem: TodoItem = {
+      itemId: ItemId.create().getValue(),
+      name: params.name,
+      completed: false,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    data.lists[listIndex].items.push(newItem);
+    await this.saveStorageData(data);
+    return newItem;
   }
 
   async deleteList(listId: number): Promise<void> {
-    await this.updateStorageData((data) => {
-      data.lists = data.lists.filter((list) => list.listId !== listId);
-    });
+    const data = await this.getStorageData();
+    data.lists = data.lists.filter((list) => list.listId !== listId);
+    await this.saveStorageData(data);
   }
 
   async deleteItem(params: { listId: number; itemId: number }): Promise<void> {
-    await this.updateStorageData((data) => {
-      const list = data.lists.find((l) => l.listId === params.listId);
-      if (list) {
-        list.items = list.items.filter((item) => item.itemId !== params.itemId);
-        list.updatedAt = new Date();
-      }
-    });
+    const data = await this.getStorageData();
+    const list = data.lists.find((l) => l.listId === params.listId);
+    if (list) {
+      list.items = list.items.filter((item) => item.itemId !== params.itemId);
+      list.updatedAt = new Date();
+      await this.saveStorageData(data);
+    }
   }
 
   async updateList(params: {
     listId: number;
     updates: Partial<Omit<TodoList, "listId" | "items">>;
   }): Promise<void> {
-    await this.updateStorageData((data) => {
-      const list = data.lists.find((l) => l.listId === params.listId);
-      if (list) {
-        Object.assign(list, params.updates, { updatedAt: new Date() });
-      }
-    });
+    const data = await this.getStorageData();
+    const list = data.lists.find((l) => l.listId === params.listId);
+    if (list) {
+      Object.assign(list, params.updates, { updatedAt: new Date() });
+      await this.saveStorageData(data);
+    }
   }
 
   async updateItem(params: {
@@ -189,14 +150,14 @@ export class TodoStorage {
     itemId: number;
     updates: Partial<Omit<TodoItem, "itemId">>;
   }): Promise<void> {
-    await this.updateStorageData((data) => {
-      const list = data.lists.find((l) => l.listId === params.listId);
-      if (list) {
-        const item = list.items.find((i) => i.itemId === params.itemId);
-        if (item) {
-          Object.assign(item, params.updates, { updatedAt: new Date() });
-        }
+    const data = await this.getStorageData();
+    const list = data.lists.find((l) => l.listId === params.listId);
+    if (list) {
+      const item = list.items.find((i) => i.itemId === params.itemId);
+      if (item) {
+        Object.assign(item, params.updates, { updatedAt: new Date() });
+        await this.saveStorageData(data);
       }
-    });
+    }
   }
 }

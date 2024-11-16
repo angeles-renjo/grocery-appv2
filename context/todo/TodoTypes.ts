@@ -1,13 +1,12 @@
-import { TodoList, TodoItem } from "../utils/types";
+// context/todo/TodoTypes.ts
+import { TodoList, TodoItem } from "../../utils/types";
 
-// State type
 export interface TodoState {
   lists: TodoList[];
   loading: boolean;
   error: string | null;
 }
 
-// Action types
 export type TodoAction =
   | { type: "SET_LISTS"; payload: TodoList[] }
   | { type: "ADD_LIST"; payload: TodoList }
@@ -25,10 +24,8 @@ export type TodoAction =
   | { type: "SET_LOADING"; payload: boolean }
   | { type: "SET_ERROR"; payload: string | null };
 
-// Context type
 export interface TodoContextType {
   state: TodoState;
-  dispatch: React.Dispatch<TodoAction>;
   loadLists: () => Promise<void>;
   addList: (title: string, dueDate: Date) => Promise<void>;
   updateList: (listId: number, updates: Partial<TodoList>) => Promise<void>;

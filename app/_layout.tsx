@@ -11,8 +11,8 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { TodoProvider } from "@/context/TodoContext";
-
+import { TodoProvider } from "@/context/todo/TodoContext";
+import { ToastProvider } from "@/context/toast/ToastContext";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -34,20 +34,22 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <TodoProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="list/[id]"
-            options={{
-              title: "List Details",
-              headerShadowVisible: false,
-            }}
-          />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </TodoProvider>
+      <ToastProvider>
+        <TodoProvider>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="list/[id]"
+              options={{
+                title: "List Details",
+                headerShadowVisible: false,
+              }}
+            />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </TodoProvider>
+      </ToastProvider>
     </ThemeProvider>
   );
 }
