@@ -66,13 +66,10 @@ export default function ListDetailScreen() {
   }, [list]);
 
   const handleAddItem = async (name: string) => {
-    if (!list) {
-      showToast("List not found", "error");
-      return;
-    }
+    if (!list) return;
 
     await addItem(list.listId, name);
-    showToast("Item added successfully", "success");
+    setShowAddItemModal(false);
   };
 
   const handleDeleteItem = async (itemId: number) => {
