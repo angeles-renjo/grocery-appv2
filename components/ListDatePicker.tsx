@@ -1,5 +1,4 @@
-// components/ListDatePicker.tsx
-import React from "react";
+import React, { useState } from "react";
 import {
   Modal,
   View,
@@ -11,7 +10,7 @@ import {
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { todoListStyles as styles } from "@/styles/todoList.styles";
+import { listDatePickerStyles as styles } from "@/styles/listDatePicker.styles";
 
 interface ListDatePickerProps {
   visible: boolean;
@@ -22,19 +21,41 @@ interface ListDatePickerProps {
 
 export const ListDatePicker: React.FC<ListDatePickerProps> = ({
   visible,
-  date,
+  date: initialDate,
   onClose,
   onConfirm,
 }) => {
+  // Keep track of the temporary date selection for Android
+  const [tempDate, setTempDate] = useState(initialDate);
+
+  // Reset temp date when the picker is opened with a new initial date
+  React.useEffect(() => {
+    setTempDate(initialDate);
+  }, [initialDate]);
+
   const handleDateChange = (
     event: DateTimePickerEvent,
     selectedDate?: Date
   ) => {
-    if (event.type === "set" && selectedDate) {
-      onConfirm(selectedDate);
-    } else {
+    if (Platform.OS === "android") {
+      // On Android, hide the picker immediately
       onClose();
+
+      // Only update if the user didn't cancel
+      if (event.type === "set" && selectedDate) {
+        onConfirm(selectedDate);
+      }
+    } else {
+      // On iOS, update the temporary date
+      if (selectedDate) {
+        setTempDate(selectedDate);
+      }
     }
+  };
+
+  const handleIOSConfirm = () => {
+    onConfirm(tempDate);
+    onClose();
   };
 
   if (Platform.OS === "ios") {
@@ -53,7 +74,7 @@ export const ListDatePicker: React.FC<ListDatePickerProps> = ({
                   <TouchableOpacity onPress={onClose}>
                     <Text style={styles.datePickerButton}>Cancel</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => onConfirm(date)}>
+                  <TouchableOpacity onPress={handleIOSConfirm}>
                     <Text
                       style={[
                         styles.datePickerButton,
@@ -64,13 +85,15 @@ export const ListDatePicker: React.FC<ListDatePickerProps> = ({
                     </Text>
                   </TouchableOpacity>
                 </View>
-                <DateTimePicker
-                  value={date}
-                  mode="date"
-                  display="spinner"
-                  onChange={handleDateChange}
-                  style={styles.datePickerIOS}
-                />
+                <View style={{ alignSelf: "center" }}>
+                  <DateTimePicker
+                    value={tempDate}
+                    mode="date"
+                    display="spinner"
+                    onChange={handleDateChange}
+                    textColor="#000000"
+                  />
+                </View>
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -79,9 +102,10 @@ export const ListDatePicker: React.FC<ListDatePickerProps> = ({
     );
   }
 
+  // Android implementation
   return visible ? (
     <DateTimePicker
-      value={date}
+      value={initialDate}
       mode="date"
       display="default"
       onChange={handleDateChange}
