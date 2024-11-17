@@ -33,7 +33,6 @@ export const homeScreenStyles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F4F4F5",
     borderRadius: 12,
     padding: 4,
     height: 50,

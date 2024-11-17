@@ -68,7 +68,7 @@ export default function ListDetailScreen() {
 
   const handleAddItem = async (name: string) => {
     if (!list) return;
-    await addItem(list.listId, name);
+    await addItem(list.listId, name, { quantity: 1, price: 0 }); // Default quantity to 1
     setShowAddItemModal(false);
   };
 
@@ -110,7 +110,10 @@ export default function ListDetailScreen() {
     await updateList(list.listId, { dueDate: newDate });
   };
 
-  const handleUpdatePrice = async (newPrice: number) => {
+  const handleUpdatePriceAndQuantity = async (
+    newPrice: number,
+    newQuantity: number
+  ) => {
     if (!list || !selectedItem) {
       showToast("Invalid selection", "error");
       return;
@@ -121,8 +124,14 @@ export default function ListDetailScreen() {
       return;
     }
 
+    if (newQuantity < 1) {
+      showToast("Quantity must be at least 1", "error");
+      return;
+    }
+
     await updateItem(list.listId, selectedItem.itemId, {
       price: newPrice,
+      quantity: newQuantity,
     });
 
     setShowPriceModal(false);
@@ -172,7 +181,12 @@ export default function ListDetailScreen() {
             {item.name}
           </Text>
         </View>
-        <Text style={styles.priceText}>${(item.price || 0).toFixed(2)}</Text>
+        <View style={styles.itemDetails}>
+          <Text style={styles.quantityText}>×{item.quantity}</Text>
+          <Text style={styles.priceText}>
+            ${(item.price * (item.quantity || 1)).toFixed(2)}
+          </Text>
+        </View>
       </View>
 
       <TouchableOpacity
@@ -259,7 +273,8 @@ export default function ListDetailScreen() {
           visible={showPriceModal}
           itemName={selectedItem?.name || ""}
           currentPrice={selectedItem?.price || 0}
-          onConfirm={handleUpdatePrice}
+          currentQuantity={selectedItem?.quantity || 1}
+          onConfirm={handleUpdatePriceAndQuantity}
           onClose={() => {
             setShowPriceModal(false);
             setSelectedItem(null);

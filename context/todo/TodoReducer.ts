@@ -1,9 +1,12 @@
 import { TodoAction } from "./TodoTypes";
 import { TodoState, TodoList, TodoItem } from "../../utils/types";
 
-// Helper functions for calculations
+// Helper functions for calculations with quantity support
 const calculateListTotal = (items: TodoItem[]): number => {
-  return items.reduce((sum, item) => sum + (item.price || 0), 0);
+  return items.reduce(
+    (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
+    0
+  );
 };
 
 const calculateGrandTotal = (lists: TodoList[]): number => {
@@ -80,7 +83,13 @@ export const todoReducer = (
         list.listId === action.payload.listId
           ? {
               ...list,
-              items: [...list.items, action.payload.item],
+              items: [
+                ...list.items,
+                {
+                  ...action.payload.item,
+                  quantity: action.payload.item.quantity || 1, // Ensure quantity has a default
+                },
+              ],
             }
           : list
       );
@@ -99,7 +108,12 @@ export const todoReducer = (
               ...list,
               items: list.items.map((item) =>
                 item.itemId === action.payload.itemId
-                  ? { ...item, ...action.payload.updates }
+                  ? {
+                      ...item,
+                      ...action.payload.updates,
+                      quantity:
+                        action.payload.updates.quantity ?? item.quantity ?? 1,
+                    }
                   : item
               ),
             }

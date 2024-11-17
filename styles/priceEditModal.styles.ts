@@ -1,4 +1,4 @@
-// priceEditModal.styles.ts
+// styles/priceEditModal.styles.ts
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
@@ -39,10 +39,21 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: "center",
   },
+  fieldsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: 24,
+  },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 24,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#333",
+    marginRight: 4,
   },
   currencySymbol: {
     fontSize: 24,
@@ -61,6 +72,10 @@ export const styles = StyleSheet.create({
     borderColor: "#ddd",
     borderRadius: 8,
     textAlign: "right",
+  },
+  quantityInput: {
+    minWidth: 60,
+    textAlign: "center",
   },
   errorText: {
     color: "#FF4444",

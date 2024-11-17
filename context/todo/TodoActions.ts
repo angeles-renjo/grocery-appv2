@@ -96,10 +96,21 @@ export const createTodoActions = (
       return result;
     },
 
-    addItem: async (listId: number, name: string) => {
+    addItem: async (
+      listId: number,
+      name: string,
+      initialData?: Partial<TodoItem>
+    ) => {
       const result = await executeOperation(
         async () => {
-          const newItem = await storage.addItem({ listId, name });
+          const newItem = await storage.addItem({
+            listId,
+            name,
+            ...initialData,
+            quantity: initialData?.quantity || 1, // Default quantity
+            price: initialData?.price || 0, // Default price
+            completed: initialData?.completed || false, // Default completion status
+          });
           dispatch({
             type: "ADD_ITEM",
             payload: { listId, item: newItem },
@@ -119,13 +130,29 @@ export const createTodoActions = (
     ) => {
       const result = await executeOperation(
         async () => {
-          await storage.updateItem({ listId, itemId, updates });
-          const updatedItem = { ...updates, updatedAt: new Date() };
+          // Ensure quantity is never less than 1
+          const sanitizedUpdates = {
+            ...updates,
+            quantity:
+              updates.quantity && updates.quantity < 1 ? 1 : updates.quantity,
+            updatedAt: new Date(),
+          };
+
+          await storage.updateItem({
+            listId,
+            itemId,
+            updates: sanitizedUpdates,
+          });
+
           dispatch({
             type: "UPDATE_ITEM",
-            payload: { listId, itemId, updates: updatedItem },
+            payload: {
+              listId,
+              itemId,
+              updates: sanitizedUpdates,
+            },
           });
-          return updatedItem;
+          return sanitizedUpdates;
         },
         "Item updated successfully",
         "Failed to update item"

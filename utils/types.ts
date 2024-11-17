@@ -3,7 +3,9 @@ export interface TodoItem {
   itemId: number;
   name: string;
   completed: boolean;
-  price: number; // New field
+  price: number;
+  quantity: number;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -12,7 +14,7 @@ export interface TodoList {
   listId: number;
   title: string;
   items: TodoItem[];
-  total: number; // New field
+  total: number;
   dueDate: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -93,3 +95,10 @@ export interface TodoState {
   error: string | null;
   grandTotal: number;
 }
+
+export type ItemUpdate = Partial<{
+  completed: boolean;
+  price: number;
+  quantity: number;
+  name: string;
+}>;

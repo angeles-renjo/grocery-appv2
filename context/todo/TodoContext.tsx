@@ -1,4 +1,3 @@
-// TodoContext.tsx
 import React, { createContext, useReducer, useEffect, useContext } from "react";
 import { TodoContextType } from "./TodoTypes";
 import { todoReducer, initialState } from "./TodoReducer";
@@ -18,7 +17,7 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({
   const storage = TodoStorage.getInstance();
   const toast = useToast();
 
-  // Create actions with void return types
+  // Create actions with updated addItem signature
   const actions = {
     loadLists: async () => {
       await createTodoActions(dispatch, storage, toast).loadLists();
@@ -35,8 +34,16 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({
     deleteList: async (listId: number) => {
       await createTodoActions(dispatch, storage, toast).deleteList(listId);
     },
-    addItem: async (listId: number, name: string) => {
-      await createTodoActions(dispatch, storage, toast).addItem(listId, name);
+    addItem: async (
+      listId: number,
+      name: string,
+      initialData?: Partial<TodoItem>
+    ) => {
+      await createTodoActions(dispatch, storage, toast).addItem(
+        listId,
+        name,
+        initialData
+      );
     },
     updateItem: async (
       listId: number,

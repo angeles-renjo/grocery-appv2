@@ -23,7 +23,11 @@ export interface TodoContextType {
   addList: (title: string, dueDate: Date) => Promise<void>;
   updateList: (listId: number, updates: Partial<TodoList>) => Promise<void>;
   deleteList: (listId: number) => Promise<void>;
-  addItem: (listId: number, name: string) => Promise<void>;
+  addItem: (
+    listId: number,
+    name: string,
+    initialData?: Partial<TodoItem>
+  ) => Promise<void>;
   updateItem: (
     listId: number,
     itemId: number,

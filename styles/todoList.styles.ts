@@ -10,7 +10,7 @@ export const todoListStyles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   topContainer: {
-    paddingBottom: Platform.OS === "ios" ? 0 : 16, // Adjust for Android
+    paddingBottom: Platform.OS === "ios" ? 0 : 16,
     backgroundColor: "transparent",
     position: "relative",
     zIndex: 1,
@@ -61,7 +61,7 @@ export const todoListStyles = StyleSheet.create({
   },
   itemsListContent: {
     padding: 16,
-    paddingBottom: 32, // Add extra padding at bottom for better spacing
+    paddingBottom: 32,
   },
   itemContainer: {
     flexDirection: "row",
@@ -100,6 +100,11 @@ export const todoListStyles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  itemDetails: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   itemText: {
     fontSize: 16,
     color: "#333333",
@@ -109,6 +114,12 @@ export const todoListStyles = StyleSheet.create({
   itemTextCompleted: {
     textDecorationLine: "line-through",
     color: "#999999",
+  },
+  quantityText: {
+    fontSize: 14,
+    color: "#666666",
+    minWidth: 30,
+    textAlign: "right",
   },
   priceText: {
     fontSize: 16,
@@ -147,7 +158,6 @@ export const todoListStyles = StyleSheet.create({
     fontWeight: "600",
     marginLeft: 8,
   },
-  // Rest of your existing styles...
   listInfo: {
     flexDirection: "row",
     justifyContent: "space-between",
