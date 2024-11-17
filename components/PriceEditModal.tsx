@@ -1,3 +1,4 @@
+// PriceEditModal.tsx
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -5,11 +6,12 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
+import { styles } from "@/styles/priceEditModal.styles";
 
 interface PriceEditModalProps {
   visible: boolean;
@@ -26,24 +28,43 @@ export const PriceEditModal = ({
   onConfirm,
   onClose,
 }: PriceEditModalProps) => {
-  const [price, setPrice] = useState(currentPrice.toString());
+  const [price, setPrice] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
-      setPrice(currentPrice.toString());
+      setPrice(currentPrice > 0 ? currentPrice.toString() : "");
       setError(null);
     }
   }, [visible, currentPrice]);
 
+  const handleClose = () => {
+    Keyboard.dismiss();
+    onClose();
+  };
+
   const handleConfirm = () => {
-    const numPrice = parseFloat(price);
+    const numPrice = parseFloat(price || "0");
     if (isNaN(numPrice) || numPrice < 0) {
       setError("Please enter a valid price");
       return;
     }
+    Keyboard.dismiss();
     onConfirm(numPrice);
     onClose();
+  };
+
+  const handleChangeText = (text: string) => {
+    const sanitizedText = text.replace(/[^0-9.]/g, "");
+    const parts = sanitizedText.split(".");
+    if (parts.length > 2) {
+      return;
+    }
+    if (parts[1] && parts[1].length > 2) {
+      return;
+    }
+    setError(null);
+    setPrice(sanitizedText);
   };
 
   return (
@@ -51,13 +72,13 @@ export const PriceEditModal = ({
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
-        <TouchableWithoutFeedback onPress={onClose}>
+        <TouchableWithoutFeedback onPress={handleClose}>
           <View style={styles.overlay}>
             <TouchableWithoutFeedback>
               <View style={styles.modalContent}>
@@ -69,13 +90,9 @@ export const PriceEditModal = ({
                   <TextInput
                     style={styles.input}
                     value={price}
-                    onChangeText={(text) => {
-                      setError(null);
-                      setPrice(text);
-                    }}
+                    onChangeText={handleChangeText}
                     keyboardType="decimal-pad"
                     autoFocus
-                    selectTextOnFocus
                     placeholder="0.00"
                   />
                 </View>
@@ -85,7 +102,7 @@ export const PriceEditModal = ({
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity
                     style={[styles.button, styles.cancelButton]}
-                    onPress={onClose}
+                    onPress={handleClose}
                   >
                     <Text style={[styles.buttonText, styles.cancelButtonText]}>
                       Cancel
@@ -108,99 +125,3 @@ export const PriceEditModal = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 24,
-    width: "80%",
-    maxWidth: 320,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 8,
-    color: "#333",
-  },
-  itemName: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  currencySymbol: {
-    fontSize: 24,
-    fontWeight: "500",
-    color: "#333",
-    marginRight: 4,
-  },
-  input: {
-    fontSize: 24,
-    fontWeight: "500",
-    color: "#333",
-    minWidth: 100,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    textAlign: "right",
-  },
-  errorText: {
-    color: "#FF4444",
-    fontSize: 14,
-    marginBottom: 16,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginHorizontal: 8,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  cancelButton: {
-    backgroundColor: "#f5f5f5",
-  },
-  cancelButtonText: {
-    color: "#666",
-  },
-  confirmButton: {
-    backgroundColor: "#007AFF",
-  },
-  confirmButtonText: {
-    color: "white",
-  },
-});

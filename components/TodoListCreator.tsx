@@ -26,7 +26,7 @@ import { ListDatePicker } from "./ListDatePicker";
 import { useTodoContext } from "@/hooks/useTodoContext";
 import { useToast } from "@/context/toast/ToastContext";
 import { AnimatedList } from "@/components/AnimatedList";
-import { homeScreenStyles as styles } from "@/styles/homescreen.styles";
+import { homeScreenStyles as styles } from "@/styles/homeScreen.styles";
 
 export default function TodoListCreator() {
   const router = useRouter();
