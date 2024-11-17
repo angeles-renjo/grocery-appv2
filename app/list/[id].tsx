@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
@@ -16,6 +15,7 @@ import { TodoItem } from "@/utils/types";
 import { todoListStyles as styles } from "@/styles/todoList.styles";
 import { ListDatePicker } from "@/components/ListDatePicker";
 import { PriceEditModal } from "@/components/PriceEditModal";
+import { AddItemModal } from "@/components/AddItemModal";
 import { useTodoContext } from "@/hooks/useTodoContext";
 import { useToast } from "@/context/toast/ToastContext";
 
@@ -34,7 +34,7 @@ export default function ListDetailScreen() {
     deleteList,
   } = useTodoContext();
 
-  const [newItemName, setNewItemName] = useState("");
+  const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedItem, setSelectedItem] = useState<TodoItem | null>(null);
   const [showPriceModal, setShowPriceModal] = useState(false);
@@ -65,21 +65,16 @@ export default function ListDetailScreen() {
     }
   }, [list]);
 
-  const handleAddItem = async () => {
+  const handleAddItem = async (name: string) => {
     if (!list) {
       showToast("List not found", "error");
       return;
     }
 
-    const trimmedName = newItemName.trim();
-    if (!trimmedName) {
-      showToast("Please enter an item name", "error");
-      return;
-    }
-
-    await addItem(list.listId, trimmedName);
-    setNewItemName("");
+    await addItem(list.listId, name);
+    showToast("Item added successfully", "success");
   };
+
   const handleDeleteItem = async (itemId: number) => {
     if (!list) {
       showToast("List not found", "error");
@@ -111,6 +106,7 @@ export default function ListDetailScreen() {
       ]
     );
   };
+
   const handleUpdateDueDate = async (newDate: Date) => {
     if (!list) {
       showToast("List not found", "error");
@@ -173,11 +169,16 @@ export default function ListDetailScreen() {
       </TouchableOpacity>
 
       <View style={styles.itemContent}>
-        <Text
-          style={[styles.itemText, item.completed && styles.itemTextCompleted]}
-        >
-          {item.name}
-        </Text>
+        <View>
+          <Text
+            style={[
+              styles.itemText,
+              item.completed && styles.itemTextCompleted,
+            ]}
+          >
+            {item.name}
+          </Text>
+        </View>
         <Text style={styles.priceText}>${(item.price || 0).toFixed(2)}</Text>
       </View>
 
@@ -232,19 +233,19 @@ export default function ListDetailScreen() {
         contentContainerStyle={styles.itemsListContent}
       />
 
-      <View style={styles.addItemContainer}>
-        <TextInput
-          style={styles.addItemInput}
-          placeholder="Add new item..."
-          value={newItemName}
-          onChangeText={setNewItemName}
-          onSubmitEditing={handleAddItem}
-          returnKeyType="done"
-        />
-        <TouchableOpacity onPress={handleAddItem} style={styles.addItemButton}>
-          <AntDesign name="pluscircle" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setShowAddItemModal(true)}
+      >
+        <AntDesign name="plus" size={24} color="white" />
+        <Text style={styles.addButtonText}>Add Item</Text>
+      </TouchableOpacity>
+
+      <AddItemModal
+        visible={showAddItemModal}
+        onClose={() => setShowAddItemModal(false)}
+        onSubmit={handleAddItem}
+      />
 
       <ListDatePicker
         visible={showDatePicker}
