@@ -9,7 +9,7 @@ export const todoListStyles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 10,
   },
-  bottomContainer: {
+  topContainer: {
     paddingBottom: Platform.OS === "ios" ? 0 : 16, // Adjust for Android
     backgroundColor: "transparent",
     position: "relative",

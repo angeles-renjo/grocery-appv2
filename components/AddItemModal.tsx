@@ -11,7 +11,7 @@ import {
   Dimensions,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-import { styles } from "@/styles/addItemModal";
+import { styles } from "@/styles/addItemModal.styles";
 
 interface AddItemModalProps {
   visible: boolean;

@@ -22,11 +22,11 @@ import Animated, {
   FadeIn,
 } from "react-native-reanimated";
 import { TodoList } from "@/utils/types";
-import { todoListStyles as styles } from "@/styles/todoList.styles";
 import { ListDatePicker } from "./ListDatePicker";
 import { useTodoContext } from "@/hooks/useTodoContext";
 import { useToast } from "@/context/toast/ToastContext";
 import { AnimatedList } from "@/components/AnimatedList";
+import { homeScreenStyles as styles } from "@/styles/homescreen.styles";
 
 export default function TodoListCreator() {
   const router = useRouter();
@@ -85,7 +85,6 @@ export default function TodoListCreator() {
 
     try {
       Keyboard.dismiss();
-      // Animate button press
       createButtonScale.value = withSequence(
         withTiming(0.9, { duration: 100 }),
         withTiming(1, { duration: 100 })
@@ -135,7 +134,7 @@ export default function TodoListCreator() {
         entering={FadeIn.duration(400)}
         style={styles.loadingContainer}
       >
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#18181B" />
         <Text style={styles.loadingText}>Loading your lists...</Text>
       </Animated.View>
     );
@@ -143,41 +142,51 @@ export default function TodoListCreator() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.grandTotalContainer}>
-        <Text style={styles.grandTotalLabel}>Grand Total:</Text>
-        <Text style={styles.grandTotalAmount}>${grandTotal.toFixed(2)}</Text>
+      {/* Total Section */}
+      <View style={styles.totalSection}>
+        <Text style={styles.totalLabel}>Total Value</Text>
+        <Text style={styles.totalAmount}>${grandTotal.toFixed(2)}</Text>
       </View>
-      <Animated.View style={[styles.createListContainer, createContainerStyle]}>
-        <View style={styles.createListInputContainer}>
+
+      {/* Input Section */}
+      <View style={styles.inputSection}>
+        <Animated.View style={[styles.inputContainer, createContainerStyle]}>
           <TextInput
-            style={styles.createListInput}
-            placeholder="New list title..."
+            style={styles.input}
+            placeholder="Enter list name"
+            placeholderTextColor="#A1A1AA"
             value={newListTitle}
             onChangeText={setNewListTitle}
             maxLength={50}
             returnKeyType="done"
             onSubmitEditing={handleCreateList}
           />
+
           <TouchableOpacity
+            style={styles.dateButton}
             onPress={() => setShowDatePicker(true)}
-            style={styles.createListDateButton}
           >
-            <Feather name="calendar" size={20} color="#666" />
-            <Text style={styles.createListDateText}>
+            <Text style={styles.dateButtonText}>
               {selectedDate.toLocaleDateString()}
             </Text>
           </TouchableOpacity>
-        </View>
-        <Animated.View style={createButtonStyle}>
-          <TouchableOpacity
-            onPress={handleCreateList}
-            style={styles.createListButton}
-            activeOpacity={0.7}
-          >
-            <AntDesign name="pluscircle" size={24} color="white" />
-          </TouchableOpacity>
+
+          <Animated.View style={createButtonStyle}>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={handleCreateList}
+              activeOpacity={0.7}
+            >
+              <AntDesign name="plus" size={20} style={styles.addButtonIcon} />
+            </TouchableOpacity>
+          </Animated.View>
         </Animated.View>
-      </Animated.View>
+      </View>
+
+      {/* Lists Section */}
+      <View style={styles.listsHeader}>
+        <Text style={styles.listsHeaderText}>YOUR LISTS</Text>
+      </View>
 
       <Animated.FlatList
         data={lists}
@@ -185,14 +194,22 @@ export default function TodoListCreator() {
           <AnimatedList list={item} onDelete={handleDeleteList} />
         )}
         keyExtractor={(list) => list.listId.toString()}
-        style={styles.listsList}
         refreshing={refreshing}
         onRefresh={() => {
           setRefreshing(true);
           loadLists().finally(() => setRefreshing(false));
         }}
-        contentContainerStyle={styles.listsContainer}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        style={styles.listContainer}
+        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              No lists yet. Create your first list!
+            </Text>
+          </View>
+        )}
         itemLayoutAnimation={Layout.springify()}
       />
 

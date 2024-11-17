@@ -219,6 +219,15 @@ export default function ListDetailScreen() {
           </TouchableOpacity>
           <Text style={styles.totalText}>Total: ${list.total.toFixed(2)}</Text>
         </View>
+        <View style={styles.topContainer}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => setShowAddItemModal(true)}
+          >
+            <AntDesign name="plus" size={24} color="white" />
+            <Text style={styles.addButtonText}>Add Item</Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.contentContainer}>
           <FlatList
@@ -228,16 +237,6 @@ export default function ListDetailScreen() {
             style={styles.itemsList}
             contentContainerStyle={styles.itemsListContent}
           />
-        </View>
-
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => setShowAddItemModal(true)}
-          >
-            <AntDesign name="plus" size={24} color="white" />
-            <Text style={styles.addButtonText}>Add Item</Text>
-          </TouchableOpacity>
         </View>
 
         <AddItemModal
