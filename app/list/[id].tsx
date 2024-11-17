@@ -18,6 +18,7 @@ import { PriceEditModal } from "@/components/PriceEditModal";
 import { AddItemModal } from "@/components/AddItemModal";
 import { useTodoContext } from "@/hooks/useTodoContext";
 import { useToast } from "@/context/toast/ToastContext";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ListDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -67,7 +68,6 @@ export default function ListDetailScreen() {
 
   const handleAddItem = async (name: string) => {
     if (!list) return;
-
     await addItem(list.listId, name);
     setShowAddItemModal(false);
   };
@@ -77,7 +77,6 @@ export default function ListDetailScreen() {
       showToast("List not found", "error");
       return;
     }
-
     await deleteItem(list.listId, itemId);
   };
 
@@ -95,7 +94,6 @@ export default function ListDetailScreen() {
               showToast("List not found", "error");
               return;
             }
-
             await deleteList(list.listId);
             router.back();
           },
@@ -109,7 +107,6 @@ export default function ListDetailScreen() {
       showToast("List not found", "error");
       return;
     }
-
     await updateList(list.listId, { dueDate: newDate });
   };
 
@@ -137,7 +134,6 @@ export default function ListDetailScreen() {
       showToast("List not found", "error");
       return;
     }
-
     await updateItem(list.listId, item.itemId, {
       completed: !item.completed,
     });
@@ -205,65 +201,72 @@ export default function ListDetailScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <View style={styles.listDetailHeader}>
-        <TouchableOpacity
-          style={styles.dueDateButton}
-          onPress={() => setShowDatePicker(true)}
-        >
-          <Feather name="calendar" size={20} color="#666" />
-          <Text style={styles.dueDateText}>
-            Due: {new Date(list.dueDate).toLocaleDateString()}
-          </Text>
-        </TouchableOpacity>
-        <Text style={styles.totalText}>Total: ${list.total.toFixed(2)}</Text>
-      </View>
-
-      <FlatList
-        data={list.items}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.itemId.toString()}
-        style={styles.itemsList}
-        contentContainerStyle={styles.itemsListContent}
-      />
-
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => setShowAddItemModal(true)}
+    <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 88 : 0}
       >
-        <AntDesign name="plus" size={24} color="white" />
-        <Text style={styles.addButtonText}>Add Item</Text>
-      </TouchableOpacity>
+        <View style={styles.listDetailHeader}>
+          <TouchableOpacity
+            style={styles.dueDateButton}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <Feather name="calendar" size={20} color="#666" />
+            <Text style={styles.dueDateText}>
+              Due: {new Date(list.dueDate).toLocaleDateString()}
+            </Text>
+          </TouchableOpacity>
+          <Text style={styles.totalText}>Total: ${list.total.toFixed(2)}</Text>
+        </View>
 
-      <AddItemModal
-        visible={showAddItemModal}
-        onClose={() => setShowAddItemModal(false)}
-        onSubmit={handleAddItem}
-      />
+        <View style={styles.contentContainer}>
+          <FlatList
+            data={list.items}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.itemId.toString()}
+            style={styles.itemsList}
+            contentContainerStyle={styles.itemsListContent}
+          />
+        </View>
 
-      <ListDatePicker
-        visible={showDatePicker}
-        date={new Date(list.dueDate)}
-        onClose={() => setShowDatePicker(false)}
-        onConfirm={(date) => {
-          handleUpdateDueDate(date);
-          setShowDatePicker(false);
-        }}
-      />
+        <View style={styles.bottomContainer}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => setShowAddItemModal(true)}
+          >
+            <AntDesign name="plus" size={24} color="white" />
+            <Text style={styles.addButtonText}>Add Item</Text>
+          </TouchableOpacity>
+        </View>
 
-      <PriceEditModal
-        visible={showPriceModal}
-        itemName={selectedItem?.name || ""}
-        currentPrice={selectedItem?.price || 0}
-        onConfirm={handleUpdatePrice}
-        onClose={() => {
-          setShowPriceModal(false);
-          setSelectedItem(null);
-        }}
-      />
-    </KeyboardAvoidingView>
+        <AddItemModal
+          visible={showAddItemModal}
+          onClose={() => setShowAddItemModal(false)}
+          onSubmit={handleAddItem}
+        />
+
+        <ListDatePicker
+          visible={showDatePicker}
+          date={new Date(list.dueDate)}
+          onClose={() => setShowDatePicker(false)}
+          onConfirm={(date) => {
+            handleUpdateDueDate(date);
+            setShowDatePicker(false);
+          }}
+        />
+
+        <PriceEditModal
+          visible={showPriceModal}
+          itemName={selectedItem?.name || ""}
+          currentPrice={selectedItem?.price || 0}
+          onConfirm={handleUpdatePrice}
+          onClose={() => {
+            setShowPriceModal(false);
+            setSelectedItem(null);
+          }}
+        />
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

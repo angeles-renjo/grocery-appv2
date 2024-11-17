@@ -1,11 +1,19 @@
-// todoList.styles.ts
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 
 export const todoListStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F5F5F5",
-    padding: 10,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 10,
+  },
+  bottomContainer: {
+    paddingBottom: Platform.OS === "ios" ? 0 : 16, // Adjust for Android
+    backgroundColor: "transparent",
+    position: "relative",
+    zIndex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -50,10 +58,10 @@ export const todoListStyles = StyleSheet.create({
   },
   itemsList: {
     flex: 1,
-    padding: 16,
   },
   itemsListContent: {
-    paddingBottom: 16,
+    padding: 16,
+    paddingBottom: 32, // Add extra padding at bottom for better spacing
   },
   itemContainer: {
     flexDirection: "row",
@@ -120,7 +128,8 @@ export const todoListStyles = StyleSheet.create({
     backgroundColor: "#007AFF",
     borderRadius: 12,
     padding: 16,
-    margin: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -129,13 +138,16 @@ export const todoListStyles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
+    position: "relative",
+    zIndex: 2,
   },
   addButtonText: {
     fontSize: 16,
     color: "white",
     fontWeight: "600",
+    marginLeft: 8,
   },
-  // List styles for the home screen
+  // Rest of your existing styles...
   listInfo: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -160,7 +172,6 @@ export const todoListStyles = StyleSheet.create({
   deleteButton: {
     padding: 8,
   },
-  // Additional utility styles
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -190,7 +201,6 @@ export const todoListStyles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  // List Section
   listsList: {
     flex: 1,
   },
