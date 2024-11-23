@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "grocery-appv2",
-    "slug": "grocery-appv2",
+    "slug": "grocerease",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -36,6 +36,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "59541a5c-7bf5-40f2-8330-cdb6962d3ae2"
+      }
+    },
+    "owner": "angeles-renjo"
   }
 }
