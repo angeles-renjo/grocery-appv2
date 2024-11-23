@@ -3,10 +3,9 @@ import { TodoState, TodoList, TodoItem } from "../../utils/types";
 
 // Helper functions for calculations with quantity support
 const calculateListTotal = (items: TodoItem[]): number => {
-  return items.reduce(
-    (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
-    0
-  );
+  return items
+    .filter((item) => item.completed) // Only count completed items
+    .reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
 };
 
 const calculateGrandTotal = (lists: TodoList[]): number => {
