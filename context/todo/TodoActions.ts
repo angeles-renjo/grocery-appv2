@@ -99,18 +99,19 @@ export const createTodoActions = (
     addItem: async (
       listId: number,
       name: string,
-      initialData?: Partial<TodoItem>
+      initialData?: Partial<
+        Omit<TodoItem, "itemId" | "createdAt" | "updatedAt">
+      >
     ) => {
       const result = await executeOperation(
         async () => {
           const newItem = await storage.addItem({
             listId,
             name,
-            ...initialData,
-            quantity: initialData?.quantity || 1, // Default quantity
-            price: initialData?.price || 0, // Default price
-            completed: initialData?.completed || false, // Default completion status
+            price: initialData?.price,
+            quantity: initialData?.quantity,
           });
+
           dispatch({
             type: "ADD_ITEM",
             payload: { listId, item: newItem },
