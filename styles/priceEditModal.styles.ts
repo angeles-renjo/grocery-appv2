@@ -110,4 +110,18 @@ export const styles = StyleSheet.create({
   confirmButtonText: {
     color: "white",
   },
+  nameInputContainer: {
+    width: "100%",
+    marginBottom: 20,
+  },
+  nameInput: {
+    fontSize: 16,
+    color: "#333",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    width: "100%",
+  },
 });

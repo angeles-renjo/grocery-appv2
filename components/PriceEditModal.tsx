@@ -1,4 +1,3 @@
-// PriceEditModal.tsx
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -17,8 +16,8 @@ interface PriceEditModalProps {
   visible: boolean;
   itemName: string;
   currentPrice: number;
-  currentQuantity: number; // New prop
-  onConfirm: (newPrice: number, newQuantity: number) => void; // Updated
+  currentQuantity: number;
+  onConfirm: (newPrice: number, newQuantity: number, newName: string) => void;
   onClose: () => void;
 }
 
@@ -26,21 +25,23 @@ export const PriceEditModal = ({
   visible,
   itemName,
   currentPrice,
-  currentQuantity, // New prop
+  currentQuantity,
   onConfirm,
   onClose,
 }: PriceEditModalProps) => {
   const [price, setPrice] = useState("");
-  const [quantity, setQuantity] = useState(""); // New state
+  const [quantity, setQuantity] = useState("");
+  const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
       setPrice(currentPrice > 0 ? currentPrice.toString() : "");
-      setQuantity(currentQuantity > 0 ? currentQuantity.toString() : "1"); // Initialize quantity
+      setQuantity(currentQuantity > 0 ? currentQuantity.toString() : "1");
+      setName(itemName);
       setError(null);
     }
-  }, [visible, currentPrice, currentQuantity]);
+  }, [visible, currentPrice, currentQuantity, itemName]);
 
   const handleClose = () => {
     Keyboard.dismiss();
@@ -50,6 +51,7 @@ export const PriceEditModal = ({
   const handleConfirm = () => {
     const numPrice = parseFloat(price || "0");
     const numQuantity = parseInt(quantity || "1", 10);
+    const trimmedName = name.trim();
 
     if (isNaN(numPrice) || numPrice < 0) {
       setError("Please enter a valid price");
@@ -61,20 +63,21 @@ export const PriceEditModal = ({
       return;
     }
 
+    if (!trimmedName) {
+      setError("Item name cannot be empty");
+      return;
+    }
+
     Keyboard.dismiss();
-    onConfirm(numPrice, numQuantity);
+    onConfirm(numPrice, numQuantity, trimmedName);
     onClose();
   };
 
   const handlePriceChange = (text: string) => {
     const sanitizedText = text.replace(/[^0-9.]/g, "");
     const parts = sanitizedText.split(".");
-    if (parts.length > 2) {
-      return;
-    }
-    if (parts[1] && parts[1].length > 2) {
-      return;
-    }
+    if (parts.length > 2) return;
+    if (parts[1] && parts[1].length > 2) return;
     setError(null);
     setPrice(sanitizedText);
   };
@@ -101,7 +104,20 @@ export const PriceEditModal = ({
             <TouchableWithoutFeedback>
               <View style={styles.modalContent}>
                 <Text style={styles.title}>Update Item</Text>
-                <Text style={styles.itemName}>{itemName}</Text>
+
+                {/* Name Input */}
+                <View style={styles.nameInputContainer}>
+                  <TextInput
+                    style={styles.nameInput}
+                    value={name}
+                    onChangeText={(text) => {
+                      setError(null);
+                      setName(text);
+                    }}
+                    placeholder="Item name"
+                    returnKeyType="next"
+                  />
+                </View>
 
                 <View style={styles.fieldsContainer}>
                   <View style={styles.inputContainer}>

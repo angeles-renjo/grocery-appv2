@@ -274,4 +274,36 @@ export const todoListStyles = StyleSheet.create({
   editButton: {
     padding: 4,
   },
+  itemNameContainer: {
+    flex: 1,
+    marginRight: 8,
+  },
+
+  itemNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  editItemContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    gap: 8,
+  },
+
+  itemNameInput: {
+    flex: 1,
+    fontSize: 16,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: "#007AFF",
+    borderRadius: 4,
+    color: "#333333",
+    backgroundColor: "white",
+  },
+
+  editItemButton: {
+    padding: 4,
+  },
 });

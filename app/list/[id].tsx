@@ -8,6 +8,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  TextInput,
 } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { AntDesign, Feather } from "@expo/vector-icons";
@@ -19,6 +20,11 @@ import { AddItemModal } from "@/components/AddItemModal";
 import { useTodoContext } from "@/hooks/useTodoContext";
 import { useToast } from "@/context/toast/ToastContext";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+interface EditingItem {
+  itemId: number;
+  name: string;
+}
 
 export default function ListDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,6 +45,7 @@ export default function ListDetailScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedItem, setSelectedItem] = useState<TodoItem | null>(null);
   const [showPriceModal, setShowPriceModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<EditingItem | null>(null);
 
   // Find the current list from context
   const list = lists.find((l) => l.listId === Number(id));
@@ -68,7 +75,7 @@ export default function ListDetailScreen() {
 
   const handleAddItem = async (name: string) => {
     if (!list) return;
-    await addItem(list.listId, name, { quantity: 1, price: 0 }); // Default quantity to 1
+    await addItem(list.listId, name, { quantity: 1, price: 0 });
     setShowAddItemModal(false);
   };
 
@@ -110,32 +117,52 @@ export default function ListDetailScreen() {
     await updateList(list.listId, { dueDate: newDate });
   };
 
+  const handleStartEditingItem = (item: TodoItem, event: any) => {
+    event.stopPropagation(); // Prevent opening price modal
+    setEditingItem({ itemId: item.itemId, name: item.name });
+  };
+
+  const handleSubmitItemEdit = async () => {
+    if (!list || !editingItem || !editingItem.name.trim()) {
+      showToast("Item name cannot be empty", "error");
+      return;
+    }
+
+    try {
+      await updateItem(list.listId, editingItem.itemId, {
+        name: editingItem.name.trim(),
+      });
+      setEditingItem(null);
+    } catch (error) {
+      showToast("Failed to update item name", "error");
+    }
+  };
+
+  const handleCancelItemEdit = () => {
+    setEditingItem(null);
+  };
+
   const handleUpdatePriceAndQuantity = async (
     newPrice: number,
-    newQuantity: number
+    newQuantity: number,
+    newName: string
   ) => {
     if (!list || !selectedItem) {
       showToast("Invalid selection", "error");
       return;
     }
 
-    if (newPrice < 0) {
-      showToast("Price cannot be negative", "error");
-      return;
+    try {
+      await updateItem(list.listId, selectedItem.itemId, {
+        price: newPrice,
+        quantity: newQuantity,
+        name: newName,
+      });
+      setShowPriceModal(false);
+      setSelectedItem(null);
+    } catch (error) {
+      showToast("Failed to update item", "error");
     }
-
-    if (newQuantity < 1) {
-      showToast("Quantity must be at least 1", "error");
-      return;
-    }
-
-    await updateItem(list.listId, selectedItem.itemId, {
-      price: newPrice,
-      quantity: newQuantity,
-    });
-
-    setShowPriceModal(false);
-    setSelectedItem(null);
   };
 
   const toggleItemCompletion = async (item: TodoItem) => {
@@ -149,8 +176,11 @@ export default function ListDetailScreen() {
   };
 
   const handleItemPress = (item: TodoItem) => {
-    setSelectedItem(item);
-    setShowPriceModal(true);
+    if (!editingItem) {
+      // Only open price modal if not editing
+      setSelectedItem(item);
+      setShowPriceModal(true);
+    }
   };
 
   const renderItem = ({ item }: { item: TodoItem }) => (
@@ -171,16 +201,11 @@ export default function ListDetailScreen() {
       </TouchableOpacity>
 
       <View style={styles.itemContent}>
-        <View>
-          <Text
-            style={[
-              styles.itemText,
-              item.completed && styles.itemTextCompleted,
-            ]}
-          >
-            {item.name}
-          </Text>
-        </View>
+        <Text
+          style={[styles.itemText, item.completed && styles.itemTextCompleted]}
+        >
+          {item.name}
+        </Text>
         <View style={styles.itemDetails}>
           <Text style={styles.quantityText}>×{item.quantity}</Text>
           <Text style={styles.priceText}>
