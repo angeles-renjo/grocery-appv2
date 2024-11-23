@@ -245,4 +245,33 @@ export const todoListStyles = StyleSheet.create({
     width: "100%",
     justifyContent: "space-between",
   },
+  titleContainer: {
+    flex: 1,
+  },
+
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  editContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginRight: 8,
+  },
+
+  editInput: {
+    flex: 1,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: "#007AFF",
+    borderRadius: 4,
+    marginRight: 8,
+  },
+
+  editButton: {
+    padding: 4,
+  },
 });
