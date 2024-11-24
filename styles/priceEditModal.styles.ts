@@ -124,4 +124,17 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     width: "100%",
   },
+  disabledInput: {
+    backgroundColor: "#F5F5F5",
+    color: "#A1A1AA",
+  },
+
+  disabledButton: {
+    backgroundColor: "#E5E5E5",
+    opacity: 0.7,
+  },
+
+  disabledButtonText: {
+    color: "#A1A1AA",
+  },
 });

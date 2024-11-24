@@ -18,6 +18,8 @@ export interface TodoList {
   dueDate: Date;
   createdAt: Date;
   updatedAt: Date;
+  isCompleted: boolean; // New field
+  completedAt?: Date; // New field
 }
 
 // Storage Types

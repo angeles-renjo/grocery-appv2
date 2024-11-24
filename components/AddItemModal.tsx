@@ -1,4 +1,3 @@
-// AddItemModal.tsx
 import React, { useState } from "react";
 import {
   Modal,
@@ -12,22 +11,38 @@ import {
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { styles } from "@/styles/addItemModal.styles";
+import { TodoList } from "@/utils/types";
 
 interface AddItemModalProps {
   visible: boolean;
   onClose: () => void;
   onSubmit: (name: string) => void;
+  list: TodoList;
 }
 
 export const AddItemModal = ({
   visible,
   onClose,
   onSubmit,
+  list,
 }: AddItemModalProps): JSX.Element => {
   const [itemName, setItemName] = useState("");
   const [nameError, setNameError] = useState("");
 
+  // If list is completed, close modal
+  React.useEffect(() => {
+    if (visible && list.isCompleted) {
+      onClose();
+    }
+  }, [visible, list.isCompleted]);
+
   const handleSubmit = () => {
+    // Prevent adding items to completed lists
+    if (list.isCompleted) {
+      setNameError("Cannot add items to completed lists");
+      return;
+    }
+
     const trimmedName = itemName.trim();
 
     if (!trimmedName) {
@@ -40,6 +55,20 @@ export const AddItemModal = ({
     setNameError("");
     onClose();
   };
+
+  // Return empty modal if list is completed
+  if (list.isCompleted) {
+    return (
+      <Modal
+        visible={false}
+        animationType="slide"
+        transparent
+        onRequestClose={onClose}
+      >
+        <View />
+      </Modal>
+    );
+  }
 
   return (
     <Modal
@@ -72,6 +101,7 @@ export const AddItemModal = ({
               autoFocus
               returnKeyType="done"
               onSubmitEditing={handleSubmit}
+              editable={!list.isCompleted}
             />
             {nameError ? (
               <Text style={styles.errorText}>{nameError}</Text>
@@ -82,8 +112,22 @@ export const AddItemModal = ({
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.addButton} onPress={handleSubmit}>
-              <Text style={styles.addButtonText}>Add Item</Text>
+            <TouchableOpacity
+              style={[
+                styles.addButton,
+                list.isCompleted && styles.disabledButton,
+              ]}
+              onPress={handleSubmit}
+              disabled={list.isCompleted}
+            >
+              <Text
+                style={[
+                  styles.addButtonText,
+                  list.isCompleted && styles.disabledButtonText,
+                ]}
+              >
+                Add Item
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

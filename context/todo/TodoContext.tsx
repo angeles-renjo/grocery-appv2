@@ -17,50 +17,44 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({
   const storage = TodoStorage.getInstance();
   const toast = useToast();
 
-  // Create actions with updated addItem signature
+  const todoActions = createTodoActions(dispatch, storage, toast);
+
+  // Create actions with updated signatures
   const actions = {
     loadLists: async () => {
-      await createTodoActions(dispatch, storage, toast).loadLists();
+      await todoActions.loadLists();
     },
     addList: async (title: string, dueDate: Date) => {
-      await createTodoActions(dispatch, storage, toast).addList(title, dueDate);
+      await todoActions.addList(title, dueDate);
     },
     updateList: async (listId: number, updates: Partial<TodoList>) => {
-      await createTodoActions(dispatch, storage, toast).updateList(
-        listId,
-        updates
-      );
+      await todoActions.updateList(listId, updates);
     },
     deleteList: async (listId: number) => {
-      await createTodoActions(dispatch, storage, toast).deleteList(listId);
+      await todoActions.deleteList(listId);
     },
     addItem: async (
       listId: number,
       name: string,
       initialData?: Partial<TodoItem>
     ) => {
-      await createTodoActions(dispatch, storage, toast).addItem(
-        listId,
-        name,
-        initialData
-      );
+      await todoActions.addItem(listId, name, initialData);
     },
     updateItem: async (
       listId: number,
       itemId: number,
       updates: Partial<TodoItem>
     ) => {
-      await createTodoActions(dispatch, storage, toast).updateItem(
-        listId,
-        itemId,
-        updates
-      );
+      await todoActions.updateItem(listId, itemId, updates);
     },
     deleteItem: async (listId: number, itemId: number) => {
-      await createTodoActions(dispatch, storage, toast).deleteItem(
-        listId,
-        itemId
-      );
+      await todoActions.deleteItem(listId, itemId);
+    },
+    completeList: async (listId: number) => {
+      await todoActions.updateList(listId, {
+        isCompleted: true,
+        completedAt: new Date(),
+      });
     },
   };
 
@@ -86,4 +80,18 @@ export const useTodo = () => {
     throw new Error("useTodo must be used within a TodoProvider");
   }
   return context;
+};
+
+// Add a custom hook for list completion
+export const useListCompletion = (listId: number) => {
+  const { completeList, updateList } = useTodo();
+
+  return {
+    completeList: async () => await completeList(listId),
+    uncompleteList: async () =>
+      await updateList(listId, {
+        isCompleted: false,
+        completedAt: undefined,
+      }),
+  };
 };

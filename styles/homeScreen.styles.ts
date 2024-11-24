@@ -148,4 +148,48 @@ export const homeScreenStyles = StyleSheet.create({
   refreshControl: {
     backgroundColor: "transparent",
   },
+
+  toggleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+  },
+
+  toggleButtonText: {
+    fontSize: 14,
+    color: "#666666",
+    marginRight: 4,
+  },
+
+  toggleIcon: {
+    marginLeft: 4,
+  },
+  // Add to your existing styles
+  historyHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E5E5",
+  },
+
+  historyHeaderText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#18181B",
+  },
+
+  historySubText: {
+    fontSize: 14,
+    color: "#71717A",
+    marginTop: 4,
+  },
+
+  emptySubText: {
+    fontSize: 14,
+    color: "#71717A",
+    textAlign: "center",
+    marginTop: 8,
+  },
 });

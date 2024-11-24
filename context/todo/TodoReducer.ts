@@ -9,7 +9,10 @@ const calculateListTotal = (items: TodoItem[]): number => {
 };
 
 const calculateGrandTotal = (lists: TodoList[]): number => {
-  return lists.reduce((sum, list) => sum + calculateListTotal(list.items), 0);
+  // Only include non-completed lists in grand total
+  return lists
+    .filter((list) => !list.isCompleted)
+    .reduce((sum, list) => sum + calculateListTotal(list.items), 0);
 };
 
 const updateListsWithTotals = (lists: TodoList[]): TodoList[] => {
@@ -44,6 +47,7 @@ export const todoReducer = (
       const newList = {
         ...action.payload,
         total: 0,
+        isCompleted: false, // Initialize as not completed
       };
       const updatedLists = [...state.lists, newList];
       return {
@@ -56,13 +60,38 @@ export const todoReducer = (
     case "UPDATE_LIST": {
       const updatedLists = state.lists.map((list) =>
         list.listId === action.payload.listId
-          ? { ...list, ...action.payload.updates }
+          ? {
+              ...list,
+              ...action.payload.updates,
+              // If marking as completed and no completedAt is provided, add it
+              ...(action.payload.updates.isCompleted &&
+                !action.payload.updates.completedAt && {
+                  completedAt: new Date(),
+                }),
+            }
           : list
       );
       return {
         ...state,
         lists: updateListsWithTotals(updatedLists),
         grandTotal: calculateGrandTotal(updatedLists),
+      };
+    }
+
+    case "COMPLETE_LIST": {
+      const updatedLists = state.lists.map((list) =>
+        list.listId === action.payload.listId
+          ? {
+              ...list,
+              isCompleted: true,
+              completedAt: action.payload.completedAt,
+            }
+          : list
+      );
+      return {
+        ...state,
+        lists: updateListsWithTotals(updatedLists),
+        grandTotal: calculateGrandTotal(updatedLists), // Will exclude completed list
       };
     }
 

@@ -11,6 +11,7 @@ import {
   Keyboard,
 } from "react-native";
 import { styles } from "@/styles/priceEditModal.styles";
+import { TodoList } from "@/utils/types";
 
 interface PriceEditModalProps {
   visible: boolean;
@@ -19,6 +20,7 @@ interface PriceEditModalProps {
   currentQuantity: number;
   onConfirm: (newPrice: number, newQuantity: number, newName: string) => void;
   onClose: () => void;
+  list: TodoList; // Add list prop
 }
 
 export const PriceEditModal = ({
@@ -28,6 +30,7 @@ export const PriceEditModal = ({
   currentQuantity,
   onConfirm,
   onClose,
+  list,
 }: PriceEditModalProps) => {
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -40,8 +43,13 @@ export const PriceEditModal = ({
       setQuantity(currentQuantity > 0 ? currentQuantity.toString() : "1");
       setName(itemName);
       setError(null);
+
+      // Auto-close if list is completed
+      if (list.isCompleted) {
+        onClose();
+      }
     }
-  }, [visible, currentPrice, currentQuantity, itemName]);
+  }, [visible, currentPrice, currentQuantity, itemName, list.isCompleted]);
 
   const handleClose = () => {
     Keyboard.dismiss();
@@ -49,6 +57,11 @@ export const PriceEditModal = ({
   };
 
   const handleConfirm = () => {
+    if (list.isCompleted) {
+      setError("Cannot modify items in completed lists");
+      return;
+    }
+
     const numPrice = parseFloat(price || "0");
     const numQuantity = parseInt(quantity || "1", 10);
     const trimmedName = name.trim();
@@ -74,6 +87,9 @@ export const PriceEditModal = ({
   };
 
   const handlePriceChange = (text: string) => {
+    if (list.isCompleted) {
+      return;
+    }
     const sanitizedText = text.replace(/[^0-9.]/g, "");
     const parts = sanitizedText.split(".");
     if (parts.length > 2) return;
@@ -83,10 +99,27 @@ export const PriceEditModal = ({
   };
 
   const handleQuantityChange = (text: string) => {
+    if (list.isCompleted) {
+      return;
+    }
     const sanitizedText = text.replace(/[^0-9]/g, "");
     setError(null);
     setQuantity(sanitizedText);
   };
+
+  // If list is completed, return empty modal
+  if (list.isCompleted) {
+    return (
+      <Modal
+        visible={false}
+        transparent
+        animationType="fade"
+        onRequestClose={handleClose}
+      >
+        <View />
+      </Modal>
+    );
+  }
 
   return (
     <Modal
@@ -108,14 +141,20 @@ export const PriceEditModal = ({
                 {/* Name Input */}
                 <View style={styles.nameInputContainer}>
                   <TextInput
-                    style={styles.nameInput}
+                    style={[
+                      styles.nameInput,
+                      list.isCompleted && styles.disabledInput,
+                    ]}
                     value={name}
                     onChangeText={(text) => {
-                      setError(null);
-                      setName(text);
+                      if (!list.isCompleted) {
+                        setError(null);
+                        setName(text);
+                      }
                     }}
                     placeholder="Item name"
                     returnKeyType="next"
+                    editable={!list.isCompleted}
                   />
                 </View>
 
@@ -123,22 +162,31 @@ export const PriceEditModal = ({
                   <View style={styles.inputContainer}>
                     <Text style={styles.currencySymbol}>$</Text>
                     <TextInput
-                      style={styles.input}
+                      style={[
+                        styles.input,
+                        list.isCompleted && styles.disabledInput,
+                      ]}
                       value={price}
                       onChangeText={handlePriceChange}
                       keyboardType="decimal-pad"
                       placeholder="0.00"
+                      editable={!list.isCompleted}
                     />
                   </View>
 
                   <View style={styles.inputContainer}>
                     <Text style={styles.label}>Qty:</Text>
                     <TextInput
-                      style={[styles.input, styles.quantityInput]}
+                      style={[
+                        styles.input,
+                        styles.quantityInput,
+                        list.isCompleted && styles.disabledInput,
+                      ]}
                       value={quantity}
                       onChangeText={handleQuantityChange}
                       keyboardType="number-pad"
                       placeholder="1"
+                      editable={!list.isCompleted}
                     />
                   </View>
                 </View>
@@ -155,10 +203,21 @@ export const PriceEditModal = ({
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.button, styles.confirmButton]}
+                    style={[
+                      styles.button,
+                      styles.confirmButton,
+                      list.isCompleted && styles.disabledButton,
+                    ]}
                     onPress={handleConfirm}
+                    disabled={list.isCompleted}
                   >
-                    <Text style={[styles.buttonText, styles.confirmButtonText]}>
+                    <Text
+                      style={[
+                        styles.buttonText,
+                        styles.confirmButtonText,
+                        list.isCompleted && styles.disabledButtonText,
+                      ]}
+                    >
                       Confirm
                     </Text>
                   </TouchableOpacity>

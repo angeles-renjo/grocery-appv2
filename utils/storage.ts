@@ -76,13 +76,18 @@ export class TodoStorage {
         dueDate: new Date(list.dueDate),
         createdAt: new Date(list.createdAt),
         updatedAt: new Date(list.updatedAt),
+        completedAt: list.completedAt ? new Date(list.completedAt) : undefined,
       }));
     } catch (error) {
       throw new StorageError("Failed to get lists", "getLists", error as Error);
     }
   }
 
-  async addList(params: { title: string; dueDate: Date }): Promise<TodoList> {
+  async addList(params: {
+    title: string;
+    dueDate: Date;
+    isCompleted?: boolean;
+  }): Promise<TodoList> {
     const data = await this.getStorageData();
     const now = new Date();
 
@@ -94,6 +99,8 @@ export class TodoStorage {
       dueDate: params.dueDate,
       createdAt: now,
       updatedAt: now,
+      isCompleted: params.isCompleted || false,
+      completedAt: params.isCompleted ? now : undefined,
     };
 
     data.lists.push(newList);
@@ -116,6 +123,11 @@ export class TodoStorage {
       throw new Error(`List with id ${params.listId} not found`);
     }
 
+    // Don't allow adding items to completed lists
+    if (data.lists[listIndex].isCompleted) {
+      throw new Error("Cannot add items to completed lists");
+    }
+
     const now = new Date();
     const newItem: TodoItem = {
       itemId: ItemId.create().getValue(),
@@ -128,7 +140,6 @@ export class TodoStorage {
     };
 
     data.lists[listIndex].items.push(newItem);
-    // Update list total with quantity
     data.lists[listIndex].total = this.calculateListTotal(
       data.lists[listIndex].items
     );
@@ -147,9 +158,14 @@ export class TodoStorage {
   async deleteItem(params: { listId: number; itemId: number }): Promise<void> {
     const data = await this.getStorageData();
     const list = data.lists.find((l) => l.listId === params.listId);
+
     if (list) {
+      // Don't allow modifying completed lists
+      if (list.isCompleted) {
+        throw new Error("Cannot modify completed lists");
+      }
+
       list.items = list.items.filter((item) => item.itemId !== params.itemId);
-      // Update list total
       list.total = this.calculateListTotal(list.items);
       list.updatedAt = new Date();
       await this.saveStorageData(data);
@@ -163,6 +179,11 @@ export class TodoStorage {
     const data = await this.getStorageData();
     const list = data.lists.find((l) => l.listId === params.listId);
     if (list) {
+      // If marking as completed, ensure completedAt is set
+      if (params.updates.isCompleted && !params.updates.completedAt) {
+        params.updates.completedAt = new Date();
+      }
+
       Object.assign(list, params.updates, { updatedAt: new Date() });
       await this.saveStorageData(data);
     }
@@ -175,11 +196,16 @@ export class TodoStorage {
   }): Promise<void> {
     const data = await this.getStorageData();
     const list = data.lists.find((l) => l.listId === params.listId);
+
     if (list) {
+      // Don't allow modifying completed lists
+      if (list.isCompleted) {
+        throw new Error("Cannot modify completed lists");
+      }
+
       const item = list.items.find((i) => i.itemId === params.itemId);
       if (item) {
         Object.assign(item, params.updates, { updatedAt: new Date() });
-        // Update list total if price or quantity changed
         if (
           params.updates.price !== undefined ||
           params.updates.quantity !== undefined

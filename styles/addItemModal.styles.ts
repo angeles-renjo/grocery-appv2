@@ -76,4 +76,12 @@ export const styles = StyleSheet.create({
     color: "white",
     fontWeight: "600",
   },
+  disabledButton: {
+    backgroundColor: "#E5E5E5",
+    opacity: 0.7,
+  },
+
+  disabledButtonText: {
+    color: "#A1A1AA",
+  },
 });

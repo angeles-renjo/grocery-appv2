@@ -8,6 +8,12 @@ type ActionResult<T> = {
   error?: string;
 };
 
+interface AddListParams {
+  title: string;
+  dueDate: Date;
+  isCompleted?: boolean;
+}
+
 export const createTodoActions = (
   dispatch: React.Dispatch<TodoAction>,
   storage: TodoStorage,
@@ -56,7 +62,11 @@ export const createTodoActions = (
     addList: async (title: string, dueDate: Date) => {
       const result = await executeOperation(
         async () => {
-          const newList = await storage.addList({ title, dueDate });
+          const newList = await storage.addList({
+            title,
+            dueDate,
+            isCompleted: false,
+          } as AddListParams);
           dispatch({ type: "ADD_LIST", payload: newList });
           return newList;
         },
@@ -69,15 +79,19 @@ export const createTodoActions = (
     updateList: async (listId: number, updates: Partial<TodoList>) => {
       const result = await executeOperation(
         async () => {
-          await storage.updateList({ listId, updates });
-          const updatedList = { ...updates, updatedAt: new Date() };
+          const updatedList = {
+            ...updates,
+            updatedAt: new Date(),
+            ...(updates.isCompleted && { completedAt: new Date() }),
+          };
+          await storage.updateList({ listId, updates: updatedList });
           dispatch({
             type: "UPDATE_LIST",
             payload: { listId, updates: updatedList },
           });
           return updatedList;
         },
-        "List updated successfully",
+        updates.isCompleted ? "List completed" : "List updated successfully",
         "Failed to update list"
       );
       return result;
@@ -131,7 +145,6 @@ export const createTodoActions = (
     ) => {
       const result = await executeOperation(
         async () => {
-          // Ensure quantity is never less than 1
           const sanitizedUpdates = {
             ...updates,
             quantity:
@@ -165,7 +178,10 @@ export const createTodoActions = (
       const result = await executeOperation(
         async () => {
           await storage.deleteItem({ listId, itemId });
-          dispatch({ type: "DELETE_ITEM", payload: { listId, itemId } });
+          dispatch({
+            type: "DELETE_ITEM",
+            payload: { listId, itemId },
+          });
           return { listId, itemId };
         },
         "Item deleted successfully",

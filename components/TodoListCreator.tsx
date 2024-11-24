@@ -42,10 +42,15 @@ export default function TodoListCreator() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
 
   // Animated values
   const shakeOffset = useSharedValue(0);
   const createButtonScale = useSharedValue(1);
+
+  // Filter lists based on completion status
+  const activeLists = lists.filter((list) => !list.isCompleted);
+  const completedLists = lists.filter((list) => list.isCompleted);
 
   const validateListTitle = (title: string): boolean => {
     if (!title.trim()) {
@@ -186,10 +191,24 @@ export default function TodoListCreator() {
       {/* Lists Section */}
       <View style={styles.listsHeader}>
         <Text style={styles.listsHeaderText}>YOUR LISTS</Text>
+        <TouchableOpacity
+          onPress={() => setShowCompleted(!showCompleted)}
+          style={styles.toggleButton}
+        >
+          <Text style={styles.toggleButtonText}>
+            {showCompleted ? "Show Active" : "Show Completed"}
+          </Text>
+          <Feather
+            name={showCompleted ? "list" : "check-square"}
+            size={16}
+            color="#666666"
+            style={styles.toggleIcon}
+          />
+        </TouchableOpacity>
       </View>
 
       <Animated.FlatList
-        data={lists}
+        data={showCompleted ? completedLists : activeLists}
         renderItem={({ item }) => (
           <AnimatedList list={item} onDelete={handleDeleteList} />
         )}
@@ -206,7 +225,9 @@ export default function TodoListCreator() {
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>
-              No lists yet. Create your first list!
+              {showCompleted
+                ? "No completed lists yet"
+                : "No active lists. Create your first list!"}
             </Text>
           </View>
         )}

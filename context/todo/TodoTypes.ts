@@ -15,7 +15,14 @@ export type TodoAction =
     }
   | { type: "DELETE_ITEM"; payload: { listId: number; itemId: number } }
   | { type: "SET_LOADING"; payload: boolean }
-  | { type: "SET_ERROR"; payload: string | null };
+  | { type: "SET_ERROR"; payload: string | null }
+  | {
+      type: "COMPLETE_LIST";
+      payload: {
+        listId: number;
+        completedAt: Date;
+      };
+    }; // Added new action type
 
 export interface TodoContextType {
   state: TodoState;
@@ -34,4 +41,5 @@ export interface TodoContextType {
     updates: Partial<TodoItem>
   ) => Promise<void>;
   deleteItem: (listId: number, itemId: number) => Promise<void>;
+  completeList: (listId: number) => Promise<void>; // Added this method
 }

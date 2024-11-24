@@ -306,4 +306,14 @@ export const todoListStyles = StyleSheet.create({
   editItemButton: {
     padding: 4,
   },
+
+  completedTitle: {
+    textDecorationLine: "line-through",
+    color: "#666666",
+  },
+
+  completeButton: {
+    marginRight: 8,
+    padding: 4,
+  },
 });
