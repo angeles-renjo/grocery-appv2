@@ -31,6 +31,12 @@ export const analyticsStyles = StyleSheet.create({
   itemStats: {
     fontSize: 14,
     marginBottom: 4,
+    opacity: 0.8,
+  },
+  priceStats: {
+    fontSize: 14,
+    marginBottom: 4,
+    fontWeight: "500",
   },
   emptyContainer: {
     flex: 1,

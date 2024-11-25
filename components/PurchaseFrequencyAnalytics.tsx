@@ -9,6 +9,9 @@ interface ItemFrequency {
   name: string;
   count: number;
   lastPurchased: Date;
+  totalPrice: number;
+  averagePrice: number;
+  priceHistory: number[];
 }
 
 export const PurchaseFrequencyAnalytics: React.FC = () => {
@@ -26,11 +29,21 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
     state.lists.forEach((list) => {
       if (list.isCompleted) {
         list.items.forEach((item) => {
-          const existingItem = itemFrequencyMap.get(item.name.toLowerCase());
+          const itemKey = item.name.toLowerCase();
+          const existingItem = itemFrequencyMap.get(itemKey);
+          const itemPrice = item.price || 0;
+
           if (existingItem) {
-            itemFrequencyMap.set(item.name.toLowerCase(), {
+            const newPriceHistory = [...existingItem.priceHistory, itemPrice];
+            const newTotalPrice = existingItem.totalPrice + itemPrice;
+            const newCount = existingItem.count + 1;
+
+            itemFrequencyMap.set(itemKey, {
               name: item.name,
-              count: existingItem.count + 1,
+              count: newCount,
+              totalPrice: newTotalPrice,
+              averagePrice: newTotalPrice / newCount,
+              priceHistory: newPriceHistory,
               lastPurchased: new Date(
                 Math.max(
                   new Date(list.completedAt || Date.now()).getTime(),
@@ -39,9 +52,12 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
               ),
             });
           } else {
-            itemFrequencyMap.set(item.name.toLowerCase(), {
+            itemFrequencyMap.set(itemKey, {
               name: item.name,
               count: 1,
+              totalPrice: itemPrice,
+              averagePrice: itemPrice,
+              priceHistory: [itemPrice],
               lastPurchased: new Date(list.completedAt || Date.now()),
             });
           }
@@ -55,6 +71,15 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
 
     setFrequencyData(sortedFrequency);
     setIsLoading(false);
+  };
+
+  const formatPrice = (price: number): string => {
+    return price.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   };
 
   if (isLoading) {
@@ -86,6 +111,9 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
               <ThemedText style={styles.itemName}>{item.name}</ThemedText>
               <ThemedText style={styles.itemStats}>
                 Purchased {item.count} {item.count === 1 ? "time" : "times"}
+              </ThemedText>
+              <ThemedText style={styles.itemStats}>
+                Average price: {formatPrice(item.averagePrice)}
               </ThemedText>
               <ThemedText style={styles.itemStats}>
                 Last purchased: {item.lastPurchased.toLocaleDateString()}
