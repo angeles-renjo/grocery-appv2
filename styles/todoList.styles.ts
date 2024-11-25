@@ -249,12 +249,6 @@ export const todoListStyles = StyleSheet.create({
     flex: 1,
   },
 
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-
   editContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -315,5 +309,28 @@ export const todoListStyles = StyleSheet.create({
   completeButton: {
     marginRight: 8,
     padding: 4,
+  },
+
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flex: 1,
+  },
+  rightActions: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  actionButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  restoreText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "500",
+    backgroundColor: "blue",
+    padding: 14,
+    borderRadius: 5,
   },
 });

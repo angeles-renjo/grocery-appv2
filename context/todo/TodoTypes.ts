@@ -22,7 +22,7 @@ export type TodoAction =
         listId: number;
         completedAt: Date;
       };
-    }; // Added new action type
+    };
 
 export interface TodoContextType {
   state: TodoState;

@@ -172,6 +172,7 @@ export const homeScreenStyles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "#E5E5E5",
+    marginVertical: 8,
   },
 
   historyHeaderText: {

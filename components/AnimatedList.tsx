@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { TouchableOpacity, View, Text, TextInput } from "react-native";
 import Animated, {
   FadeIn,
@@ -14,6 +14,7 @@ import { todoListStyles as styles } from "@/styles/todoList.styles";
 import { useRouter } from "expo-router";
 import { useTodoContext } from "@/hooks/useTodoContext";
 import { useListCompletion } from "@/context/todo/TodoContext";
+import { useToast } from "@/context/toast/ToastContext";
 
 interface AnimatedListProps {
   list: TodoList;
@@ -24,6 +25,9 @@ export const AnimatedList = ({ list, onDelete }: AnimatedListProps) => {
   const router = useRouter();
   const { updateList } = useTodoContext();
   const { completeList, uncompleteList } = useListCompletion(list.listId);
+  const toast = useToast();
+  const inputRef = useRef<TextInput>(null);
+
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(list.title);
 
@@ -48,21 +52,47 @@ export const AnimatedList = ({ list, onDelete }: AnimatedListProps) => {
     e.stopPropagation();
     if (!list.isCompleted) {
       setIsEditing(true);
+      // Use setTimeout to ensure the input is rendered before focusing
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   };
 
   const handleSubmitEdit = async () => {
-    if (editedTitle.trim() && editedTitle !== list.title) {
-      await updateList(list.listId, { title: editedTitle.trim() });
-    } else {
+    const trimmedTitle = editedTitle.trim();
+    if (!trimmedTitle) {
       setEditedTitle(list.title);
+      toast.showToast("List name cannot be empty", "error");
+      setIsEditing(false);
+      return;
+    }
+
+    if (trimmedTitle !== list.title) {
+      try {
+        await updateList(list.listId, {
+          title: trimmedTitle,
+          updatedAt: new Date(),
+        });
+        toast.showToast("List name updated successfully", "success");
+      } catch (error) {
+        toast.showToast("Failed to update list name", "error");
+        setEditedTitle(list.title);
+      }
     }
     setIsEditing(false);
   };
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = (e?: any) => {
+    e?.stopPropagation();
     setEditedTitle(list.title);
     setIsEditing(false);
+  };
+
+  const handleKeyPress = (e: any) => {
+    if (e.nativeEvent.key === "Enter") {
+      handleSubmitEdit();
+    } else if (e.nativeEvent.key === "Escape") {
+      handleCancelEdit();
+    }
   };
 
   const handleToggleComplete = async (e: any) => {
@@ -84,7 +114,7 @@ export const AnimatedList = ({ list, onDelete }: AnimatedListProps) => {
         <TouchableOpacity
           onPress={handlePress}
           activeOpacity={0.7}
-          disabled={list.isCompleted}
+          disabled={list.isCompleted || isEditing}
         >
           <Animated.View
             entering={SlideInRight.duration(300)}
@@ -94,56 +124,73 @@ export const AnimatedList = ({ list, onDelete }: AnimatedListProps) => {
               {isEditing ? (
                 <View style={styles.editContainer}>
                   <TextInput
+                    ref={inputRef}
+                    style={styles.editInput}
                     value={editedTitle}
                     onChangeText={setEditedTitle}
-                    style={[styles.listTitle, styles.editInput]}
-                    autoFocus
-                    onBlur={handleCancelEdit}
+                    onBlur={handleSubmitEdit}
                     onSubmitEditing={handleSubmitEdit}
+                    onKeyPress={handleKeyPress}
+                    blurOnSubmit={true}
+                    selectTextOnFocus={true}
+                    maxLength={50}
+                    autoCapitalize="sentences"
                   />
                   <TouchableOpacity
-                    onPress={handleSubmitEdit}
-                    style={styles.editButton}
+                    onPress={handleCancelEdit}
+                    style={styles.actionButton}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <AntDesign name="check" size={18} color="#4CAF50" />
+                    <Feather name="x" size={18} color="#666666" />
                   </TouchableOpacity>
                   <TouchableOpacity
-                    onPress={handleCancelEdit}
-                    style={styles.editButton}
+                    onPress={handleSubmitEdit}
+                    style={styles.actionButton}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <AntDesign name="close" size={18} color="#FF4444" />
+                    <Feather name="check" size={18} color="#007AFF" />
                   </TouchableOpacity>
                 </View>
               ) : (
                 <View style={styles.titleRow}>
-                  <TouchableOpacity
-                    onPress={handleToggleComplete}
-                    style={styles.completeButton}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <Feather
-                      name={list.isCompleted ? "check-circle" : "circle"}
-                      size={20}
-                      color={list.isCompleted ? "#4CAF50" : "#666666"}
-                    />
-                  </TouchableOpacity>
+                  {!list.isCompleted && (
+                    <TouchableOpacity
+                      onPress={handleToggleComplete}
+                      style={styles.completeButton}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Feather name="circle" size={20} color="#666666" />
+                    </TouchableOpacity>
+                  )}
                   <Text
                     style={[
                       styles.listTitle,
                       list.isCompleted && styles.completedTitle,
                     ]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
                   >
                     {list.title}
                   </Text>
-                  {!list.isCompleted && (
-                    <TouchableOpacity
-                      onPress={handleEdit}
-                      style={styles.editButton}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    >
-                      <Feather name="edit-2" size={16} color="#666666" />
-                    </TouchableOpacity>
-                  )}
+                  <View style={styles.rightActions}>
+                    {list.isCompleted ? (
+                      <TouchableOpacity
+                        onPress={handleToggleComplete}
+                        style={styles.actionButton}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        <Text style={styles.restoreText}>Restore</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
+                        onPress={handleEdit}
+                        style={styles.editButton}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        <Feather name="edit-2" size={16} color="#666666" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </View>
               )}
               <View style={styles.listInfo}>
@@ -160,15 +207,13 @@ export const AnimatedList = ({ list, onDelete }: AnimatedListProps) => {
               <Text style={styles.dateText}>
                 {new Date(list.dueDate).toLocaleDateString()}
               </Text>
-              {!list.isCompleted && (
-                <TouchableOpacity
-                  onPress={handleDelete}
-                  style={styles.deleteButton}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <AntDesign name="delete" size={18} color="#FF4444" />
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                onPress={handleDelete}
+                style={styles.deleteButton}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <AntDesign name="delete" size={18} color="#FF4444" />
+              </TouchableOpacity>
             </View>
           </Animated.View>
         </TouchableOpacity>
