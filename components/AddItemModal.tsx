@@ -7,17 +7,18 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Dimensions,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { styles } from "@/styles/addItemModal.styles";
 import { TodoList } from "@/utils/types";
+import { groceryNormalizer } from "@/utils/groceryNormalizer";
 
 interface AddItemModalProps {
   visible: boolean;
   onClose: () => void;
   onSubmit: (name: string) => void;
-  list?: TodoList; // Made optional
+  list?: TodoList;
+  existingItems?: string[]; // Add this to check for duplicates
 }
 
 export const AddItemModal = ({
@@ -25,6 +26,7 @@ export const AddItemModal = ({
   onClose,
   onSubmit,
   list,
+  existingItems = [],
 }: AddItemModalProps): JSX.Element => {
   const [itemName, setItemName] = useState("");
   const [nameError, setNameError] = useState("");
@@ -50,12 +52,22 @@ export const AddItemModal = ({
       return;
     }
 
-    // Check for maximum length (optional, but recommended)
     if (trimmedName.length > 100) {
       setNameError("Item name is too long (maximum 100 characters)");
       return;
     }
 
+    // Check for duplicates using normalized name, but keep original input
+    const isDuplicate = existingItems.some((existingItem) =>
+      groceryNormalizer.isSameItem(existingItem, trimmedName)
+    );
+
+    if (isDuplicate) {
+      setNameError("This item already exists in the list");
+      return;
+    }
+
+    // Submit the original name - normalization will happen in the data layer
     onSubmit(trimmedName);
     setItemName("");
     setNameError("");

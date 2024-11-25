@@ -1,4 +1,3 @@
-// itemModal.styles.ts
 import { StyleSheet, Dimensions, Platform } from "react-native";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -80,8 +79,45 @@ export const styles = StyleSheet.create({
     backgroundColor: "#E5E5E5",
     opacity: 0.7,
   },
-
   disabledButtonText: {
     color: "#A1A1AA",
+  },
+  // New styles for suggestion UI
+  suggestionContainer: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: "#F0F9FF", // Light blue background
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#BAE6FD", // Light blue border
+  },
+  suggestionText: {
+    fontSize: 14,
+    color: "#0369A1", // Darker blue text
+    marginBottom: 8,
+  },
+  suggestionButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
+  suggestionButton: {
+    flex: 1,
+    backgroundColor: "#0EA5E9", // Blue button
+    padding: 8,
+    borderRadius: 6,
+    marginHorizontal: 4,
+    alignItems: "center",
+  },
+  suggestionButtonNo: {
+    backgroundColor: "#F1F5F9", // Light gray button for "No"
+  },
+  suggestionButtonText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  suggestionButtonTextNo: {
+    color: "#64748B", // Darker text for "No" button
   },
 });

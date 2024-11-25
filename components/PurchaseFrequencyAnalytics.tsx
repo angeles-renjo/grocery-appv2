@@ -4,14 +4,16 @@ import { ThemedText } from "../components/ThemedText";
 import { ThemedView } from "../components/ThemedView";
 import { useTodoContext } from "../hooks/useTodoContext";
 import { analyticsStyles as styles } from "@/styles/analytics.styles";
+import { groceryNormalizer } from "@/utils/groceryNormalizer";
 
 interface ItemFrequency {
-  name: string;
+  originalNames: string[];
   count: number;
   lastPurchased: Date;
   totalPrice: number;
   averagePrice: number;
   priceHistory: number[];
+  displayName: string;
 }
 
 export const PurchaseFrequencyAnalytics: React.FC = () => {
@@ -26,51 +28,86 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
   const calculateFrequency = () => {
     const itemFrequencyMap = new Map<string, ItemFrequency>();
 
-    state.lists.forEach((list) => {
-      if (list.isCompleted) {
-        list.items.forEach((item) => {
-          const itemKey = item.name.toLowerCase();
-          const existingItem = itemFrequencyMap.get(itemKey);
-          const itemPrice = item.price || 0;
+    // Process only completed lists
+    const completedLists = state.lists.filter((list) => list.isCompleted);
 
-          if (existingItem) {
-            const newPriceHistory = [...existingItem.priceHistory, itemPrice];
-            const newTotalPrice = existingItem.totalPrice + itemPrice;
-            const newCount = existingItem.count + 1;
+    completedLists.forEach((list) => {
+      if (!list.items) return; // Skip if no items
 
-            itemFrequencyMap.set(itemKey, {
-              name: item.name,
-              count: newCount,
-              totalPrice: newTotalPrice,
-              averagePrice: newTotalPrice / newCount,
-              priceHistory: newPriceHistory,
-              lastPurchased: new Date(
-                Math.max(
-                  new Date(list.completedAt || Date.now()).getTime(),
-                  new Date(existingItem.lastPurchased).getTime()
-                )
-              ),
-            });
-          } else {
-            itemFrequencyMap.set(itemKey, {
-              name: item.name,
-              count: 1,
-              totalPrice: itemPrice,
-              averagePrice: itemPrice,
-              priceHistory: [itemPrice],
-              lastPurchased: new Date(list.completedAt || Date.now()),
-            });
-          }
-        });
-      }
+      list.items.forEach((item) => {
+        if (!item.name) return; // Skip if no name
+
+        const normalizedResult = groceryNormalizer.normalize(item.name);
+        const normalizedName = normalizedResult.normalized;
+        const itemPrice = item.price || 0;
+        const purchaseDate = list.completedAt
+          ? new Date(list.completedAt)
+          : new Date();
+
+        const existingItem = itemFrequencyMap.get(normalizedName);
+
+        if (existingItem) {
+          // Update existing item
+          const uniqueOriginalNames = new Set(existingItem.originalNames);
+          uniqueOriginalNames.add(item.name);
+
+          itemFrequencyMap.set(normalizedName, {
+            originalNames: Array.from(uniqueOriginalNames),
+            count: existingItem.count + 1,
+            totalPrice: existingItem.totalPrice + itemPrice,
+            averagePrice:
+              (existingItem.totalPrice + itemPrice) / (existingItem.count + 1),
+            priceHistory: [...existingItem.priceHistory, itemPrice],
+            lastPurchased: new Date(
+              Math.max(
+                existingItem.lastPurchased.getTime(),
+                purchaseDate.getTime()
+              )
+            ),
+            displayName: existingItem.displayName, // Keep the existing display name
+          });
+        } else {
+          // Create new item entry
+          itemFrequencyMap.set(normalizedName, {
+            originalNames: [item.name],
+            count: 1,
+            totalPrice: itemPrice,
+            averagePrice: itemPrice,
+            priceHistory: [itemPrice],
+            lastPurchased: purchaseDate,
+            displayName: item.name,
+          });
+        }
+      });
     });
 
-    const sortedFrequency = Array.from(itemFrequencyMap.values()).sort(
-      (a, b) => b.count - a.count
-    );
+    // Convert to array and sort by frequency
+    const sortedFrequency = Array.from(itemFrequencyMap.values())
+      .sort((a, b) => {
+        // First sort by count (descending)
+        if (b.count !== a.count) {
+          return b.count - a.count;
+        }
+        // Then by last purchased date (most recent first)
+        return b.lastPurchased.getTime() - a.lastPurchased.getTime();
+      })
+      .map((item) => ({
+        ...item,
+        // Update display name to most frequent variant
+        displayName: getMostFrequentName(item.originalNames),
+      }));
 
     setFrequencyData(sortedFrequency);
     setIsLoading(false);
+  };
+
+  const getMostFrequentName = (names: string[]): string => {
+    const nameCounts = names.reduce((acc, name) => {
+      acc[name] = (acc[name] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(nameCounts).sort((a, b) => b[1] - a[1])[0][0];
   };
 
   const formatPrice = (price: number): string => {
@@ -93,7 +130,7 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
   return (
     <View style={styles.container}>
       <ScrollView>
-        {frequencyData.length === 0 ? (
+        {!frequencyData || frequencyData.length === 0 ? (
           <View style={styles.emptyContainer}>
             <ThemedText style={styles.emptyText}>
               No purchase history available yet
@@ -105,19 +142,55 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
         ) : (
           frequencyData.map((item, index) => (
             <ThemedView
-              key={`${item.name}-${index}`}
+              key={`${item.displayName}-${index}`}
               style={styles.itemContainer}
             >
-              <ThemedText style={styles.itemName}>{item.name}</ThemedText>
-              <ThemedText style={styles.itemStats}>
-                Purchased {item.count} {item.count === 1 ? "time" : "times"}
+              <ThemedText style={styles.itemName}>
+                {item.displayName}
               </ThemedText>
-              <ThemedText style={styles.itemStats}>
-                Average price: {formatPrice(item.averagePrice)}
-              </ThemedText>
-              <ThemedText style={styles.itemStats}>
-                Last purchased: {item.lastPurchased.toLocaleDateString()}
-              </ThemedText>
+
+              {item.originalNames.length > 1 && (
+                <View style={styles.variationsContainer}>
+                  {item.originalNames
+                    .filter((name) => name !== item.displayName)
+                    .map((name, idx) => (
+                      <View key={idx} style={styles.variationChip}>
+                        <ThemedText style={styles.variationChipText}>
+                          {name}
+                        </ThemedText>
+                      </View>
+                    ))}
+                </View>
+              )}
+
+              <View style={styles.divider} />
+
+              <View style={styles.statContainer}>
+                <ThemedText style={styles.statLabel}>
+                  Purchase Frequency
+                </ThemedText>
+                <ThemedText style={styles.statValue}>
+                  {item.count} {item.count === 1 ? "time" : "times"}
+                </ThemedText>
+              </View>
+
+              <View style={styles.priceContainer}>
+                <ThemedText style={styles.priceLabel}>
+                  Average Price:
+                </ThemedText>
+                <ThemedText style={styles.priceValue}>
+                  {formatPrice(item.averagePrice)}
+                </ThemedText>
+              </View>
+
+              <View style={styles.dateContainer}>
+                <ThemedText style={styles.dateLabel}>
+                  Last Purchased:
+                </ThemedText>
+                <ThemedText style={styles.dateValue}>
+                  {item.lastPurchased.toLocaleDateString()}
+                </ThemedText>
+              </View>
             </ThemedView>
           ))
         )}
