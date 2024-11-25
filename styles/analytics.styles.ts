@@ -2,9 +2,33 @@ import { StyleSheet } from "react-native";
 
 export const analyticsStyles = StyleSheet.create({
   // View/Container styles
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+  },
+  contentContainer: {
     padding: 16,
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 4,
+    color: "#1F2937",
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: "#6B7280",
+    marginBottom: 16,
   },
   loadingContainer: {
     flex: 1,
@@ -24,6 +48,7 @@ export const analyticsStyles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     elevation: 2,
     shadowColor: "#000",
+    margin: 14,
     shadowOffset: {
       width: 0,
       height: 2,

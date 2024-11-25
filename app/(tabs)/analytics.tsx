@@ -1,5 +1,5 @@
 import React from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import PurchaseFrequencyAnalytics from "@/components/PurchaseFrequencyAnalytics";
 import { ThemedText } from "@/components/ThemedText";
@@ -7,14 +7,19 @@ import { analyticsStyles as styles } from "@/styles/analytics.styles";
 
 export default function AnalyticsScreen() {
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <ThemedText style={styles.headerTitle}>Purchase Analytics</ThemedText>
-        <ThemedText style={styles.headerSubtitle}>
-          Track your shopping patterns
-        </ThemedText>
-      </View>
-      <PurchaseFrequencyAnalytics />
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContainer}
+      >
+        <View style={styles.header}>
+          <ThemedText style={styles.headerTitle}>Purchase Analytics</ThemedText>
+          <ThemedText style={styles.headerSubtitle}>
+            Track your shopping patterns
+          </ThemedText>
+        </View>
+        <PurchaseFrequencyAnalytics />
+      </ScrollView>
     </SafeAreaView>
   );
 }
