@@ -1,7 +1,8 @@
+// styles/analytics.styles.ts
 import { StyleSheet } from "react-native";
+import { Colors } from "@/constants/Colors";
 
 export const analyticsStyles = StyleSheet.create({
-  // View/Container styles
   safeArea: {
     flex: 1,
   },
@@ -20,14 +21,9 @@ export const analyticsStyles = StyleSheet.create({
     paddingBottom: 8,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
     marginBottom: 4,
-    color: "#1F2937",
   },
   headerSubtitle: {
-    fontSize: 16,
-    color: "#6B7280",
     marginBottom: 16,
   },
   loadingContainer: {
@@ -41,14 +37,15 @@ export const analyticsStyles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 32,
   },
+  // Card will always be white regardless of theme
   itemContainer: {
     padding: 16,
     marginBottom: 16,
     borderRadius: 8,
-    backgroundColor: "#FFFFFF",
+    margin: 14,
+    backgroundColor: "#FFFFFF", // Always white
     elevation: 2,
     shadowColor: "#000",
-    margin: 14,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -63,14 +60,13 @@ export const analyticsStyles = StyleSheet.create({
     marginTop: -4,
   },
   variationChip: {
-    backgroundColor: "#F3F4F6",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
     marginRight: 6,
     marginBottom: 6,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: Colors.light.secondary,
   },
   statContainer: {
     marginBottom: 8,
@@ -87,89 +83,49 @@ export const analyticsStyles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: Colors.light.secondary,
     marginVertical: 8,
   },
-  sortButtonsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 16,
-    padding: 8,
-  },
-  sortButton: {
-    padding: 8,
-    borderRadius: 8,
-    minWidth: 80,
-    alignItems: "center",
-  },
-  sortButtonActive: {
-    backgroundColor: "#e0e0e0",
-  },
-
-  // Text styles
+  // Text styles - using dark text colors since card is always white
   emptyText: {
-    fontSize: 16,
     textAlign: "center",
     marginBottom: 8,
   },
   itemName: {
-    fontSize: 18,
-    fontWeight: "bold",
     marginBottom: 8,
-    color: "#1F2937",
+    color: "#1F2937", // Always dark text since background is white
   },
   variationChipText: {
     fontSize: 12,
-    color: "#6B7280",
-  },
-  itemStats: {
-    fontSize: 14,
-    marginBottom: 4,
-    color: "#4B5563",
+    color: "#6B7280", // Always dark text
   },
   statLabel: {
-    fontSize: 14,
-    color: "#6B7280",
     marginBottom: 2,
+    color: "#6B7280", // Always dark text
   },
   statValue: {
-    fontSize: 14,
-    color: "#1F2937",
-    fontWeight: "500",
     marginBottom: 8,
+    color: "#1F2937", // Always dark text
   },
   priceLabel: {
-    fontSize: 14,
-    color: "#6B7280",
     marginRight: 8,
+    color: "#6B7280", // Always dark text
   },
   priceValue: {
-    fontSize: 14,
-    color: "#047857",
-    fontWeight: "500",
+    color: Colors.light.tertiary,
   },
   dateLabel: {
-    fontSize: 14,
-    color: "#6B7280",
     marginRight: 8,
+    color: "#6B7280", // Always dark text
   },
   dateValue: {
-    fontSize: 14,
-    color: "#1F2937",
-  },
-  sortButtonText: {
-    fontSize: 14,
-    color: "#4B5563",
-  },
-  sortButtonActiveText: {
-    color: "#1F2937",
-    fontWeight: "500",
+    color: "#1F2937", // Always dark text
   },
   listContentContainer: {
     flexGrow: 1,
-    paddingBottom: 20, // Add some bottom padding for better scrolling
+    paddingBottom: 20,
   },
   analyticsContainer: {
-    flex: 1, // This ensures the FlatList can take remaining space
+    flex: 1,
   },
 });

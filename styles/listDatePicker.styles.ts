@@ -1,4 +1,5 @@
 import { StyleSheet, Platform } from "react-native";
+import { Colors } from "@/constants/Colors";
 
 export const listDatePickerStyles = StyleSheet.create({
   modalOverlay: {
@@ -8,10 +9,6 @@ export const listDatePickerStyles = StyleSheet.create({
   },
 
   modalContent: {
-    backgroundColor: Platform.select({
-      ios: "#ffffff",
-      android: "transparent",
-    }),
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
     paddingBottom: Platform.select({
@@ -27,12 +24,11 @@ export const listDatePickerStyles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#E5E5E5",
+    borderBottomColor: Colors.light.secondary,
   },
 
   datePickerButton: {
     fontSize: 16,
-    color: "#007AFF",
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
@@ -52,23 +48,21 @@ export const listDatePickerStyles = StyleSheet.create({
 
   dateDisplay: {
     padding: 12,
-    backgroundColor: "#f8f8f8",
     borderRadius: 8,
     marginVertical: 8,
   },
 
   dateText: {
     fontSize: 16,
-    color: "#333333",
   },
 
   errorContainer: {
-    borderColor: "#FF3B30",
+    borderColor: "#FF3B30", // Keep error color consistent
     borderWidth: 1,
   },
 
   errorText: {
-    color: "#FF3B30",
+    color: "#FF3B30", // Keep error color consistent
     fontSize: 12,
     marginTop: 4,
     marginLeft: 4,

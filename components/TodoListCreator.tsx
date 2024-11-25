@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
@@ -27,9 +25,14 @@ import { useTodoContext } from "@/hooks/useTodoContext";
 import { useToast } from "@/context/toast/ToastContext";
 import { AnimatedList } from "@/components/AnimatedList";
 import { homeScreenStyles as styles } from "@/styles/homeScreen.styles";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/ThemedText";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TodoListCreator() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
   const {
     state: { lists, loading, grandTotal },
     addList,
@@ -64,7 +67,6 @@ export default function TodoListCreator() {
       return false;
     }
 
-    // Only check for duplicates among active (non-completed) lists
     const isDuplicateActive = lists.some(
       (list) =>
         !list.isCompleted && list.title.toLowerCase() === title.toLowerCase()
@@ -145,31 +147,39 @@ export default function TodoListCreator() {
 
   if (loading) {
     return (
-      <Animated.View
-        entering={FadeIn.duration(400)}
-        style={styles.loadingContainer}
-      >
-        <ActivityIndicator size="large" color="#18181B" />
-        <Text style={styles.loadingText}>Loading your lists...</Text>
-      </Animated.View>
+      <ThemedView backgroundColor="background" style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.light.accent} />
+        <ThemedText type="default" textColor="text">
+          Loading your lists...
+        </ThemedText>
+      </ThemedView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <ThemedView backgroundColor="background" style={styles.container}>
       {/* Total Section */}
-      <View style={styles.totalSection}>
-        <Text style={styles.totalLabel}>Total Value</Text>
-        <Text style={styles.totalAmount}>${grandTotal.toFixed(2)}</Text>
-      </View>
+      <ThemedView backgroundColor="background" style={styles.totalSection}>
+        <ThemedText type="default" textColor="text" style={styles.totalLabel}>
+          Total Value
+        </ThemedText>
+        <ThemedText type="title" textColor="text" style={styles.totalAmount}>
+          ${grandTotal.toFixed(2)}
+        </ThemedText>
+      </ThemedView>
 
       {/* Input Section */}
-      <View style={styles.inputSection}>
+      <ThemedView backgroundColor="background" style={styles.inputSection}>
         <Animated.View style={[styles.inputContainer, createContainerStyle]}>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              { color: Colors[colorScheme === "dark" ? "dark" : "light"].text },
+            ]}
             placeholder="Enter list name"
-            placeholderTextColor="#A1A1AA"
+            placeholderTextColor={
+              Colors[colorScheme === "dark" ? "dark" : "light"].text + "80"
+            } // Adding 80 for opacity
             value={newListTitle}
             onChangeText={setNewListTitle}
             maxLength={50}
@@ -178,45 +188,60 @@ export default function TodoListCreator() {
           />
 
           <TouchableOpacity
-            style={styles.dateButton}
+            style={[
+              styles.dateButton,
+              { backgroundColor: Colors.light.secondary },
+            ]}
             onPress={() => setShowDatePicker(true)}
           >
-            <Text style={styles.dateButtonText}>
+            <ThemedText textColor="text" style={styles.dateButtonText}>
               {selectedDate.toLocaleDateString()}
-            </Text>
+            </ThemedText>
           </TouchableOpacity>
-
           <Animated.View style={createButtonStyle}>
             <TouchableOpacity
-              style={styles.addButton}
+              style={[
+                styles.addButton,
+                { backgroundColor: Colors.light.buttonBackground }, // Using lightGreen for button background
+              ]}
               onPress={handleCreateList}
               activeOpacity={0.7}
             >
-              <AntDesign name="plus" size={20} style={styles.addButtonIcon} />
+              <AntDesign name="plus" size={20} color="#fff" />
             </TouchableOpacity>
           </Animated.View>
         </Animated.View>
-      </View>
+      </ThemedView>
 
-      {/* Lists Section */}
-      <View style={styles.listsHeader}>
-        <Text style={styles.listsHeaderText}>YOUR LISTS</Text>
+      {/* Lists Header */}
+      <ThemedView backgroundColor="background" style={styles.listsHeader}>
+        <ThemedText
+          type="defaultSemiBold"
+          textColor="text"
+          style={styles.listsHeaderText}
+        >
+          YOUR LISTS
+        </ThemedText>
         <TouchableOpacity
           onPress={() => setShowCompleted(!showCompleted)}
-          style={styles.toggleButton}
+          style={[
+            styles.toggleButton,
+            { backgroundColor: Colors.light.secondary },
+          ]}
         >
-          <Text style={styles.toggleButtonText}>
+          <ThemedText textColor="text" style={styles.toggleButtonText}>
             {showCompleted ? "Show Active" : "Show Completed"}
-          </Text>
+          </ThemedText>
           <Feather
             name={showCompleted ? "list" : "check-square"}
             size={16}
-            color="#666666"
+            color={Colors.light.accent}
             style={styles.toggleIcon}
           />
         </TouchableOpacity>
-      </View>
+      </ThemedView>
 
+      {/* Lists */}
       <Animated.FlatList
         data={showCompleted ? completedLists : activeLists}
         renderItem={({ item }) => (
@@ -231,15 +256,18 @@ export default function TodoListCreator() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         style={styles.listContainer}
-        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+        ItemSeparatorComponent={() => <ThemedView style={{ height: 12 }} />}
         ListEmptyComponent={() => (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
+          <ThemedView
+            backgroundColor="background"
+            style={styles.emptyContainer}
+          >
+            <ThemedText textColor="text" style={styles.emptyText}>
               {showCompleted
                 ? "No completed lists yet"
                 : "No active lists. Create your first list!"}
-            </Text>
-          </View>
+            </ThemedText>
+          </ThemedView>
         )}
         itemLayoutAnimation={Layout.springify()}
       />
@@ -253,6 +281,6 @@ export default function TodoListCreator() {
           setShowDatePicker(false);
         }}
       />
-    </View>
+    </ThemedView>
   );
 }

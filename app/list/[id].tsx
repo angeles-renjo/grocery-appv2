@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
-  TextInput,
+  Text,
 } from "react-native";
 import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { AntDesign, Feather } from "@expo/vector-icons";
@@ -20,6 +19,10 @@ import { AddItemModal } from "@/components/AddItemModal";
 import { useTodoContext } from "@/hooks/useTodoContext";
 import { useToast } from "@/context/toast/ToastContext";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/ThemedText";
+import { Colors } from "@/constants/Colors";
 
 interface EditingItem {
   itemId: number;
@@ -31,6 +34,7 @@ export default function ListDetailScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const { showToast } = useToast();
+  const colorScheme = useColorScheme();
 
   const {
     state: { lists, loading },
@@ -118,7 +122,7 @@ export default function ListDetailScreen() {
   };
 
   const handleStartEditingItem = (item: TodoItem, event: any) => {
-    event.stopPropagation(); // Prevent opening price modal
+    event.stopPropagation();
     setEditingItem({ itemId: item.itemId, name: item.name });
   };
 
@@ -177,7 +181,6 @@ export default function ListDetailScreen() {
 
   const handleItemPress = (item: TodoItem) => {
     if (!editingItem) {
-      // Only open price modal if not editing
       setSelectedItem(item);
       setShowPriceModal(true);
     }
@@ -185,7 +188,13 @@ export default function ListDetailScreen() {
 
   const renderItem = ({ item }: { item: TodoItem }) => (
     <TouchableOpacity
-      style={styles.itemContainer}
+      style={[
+        styles.itemContainer,
+        {
+          backgroundColor:
+            Colors[colorScheme === "dark" ? "dark" : "light"].primary,
+        },
+      ]}
       onPress={() => handleItemPress(item)}
       activeOpacity={0.7}
     >
@@ -194,23 +203,34 @@ export default function ListDetailScreen() {
         style={styles.itemCheckbox}
       >
         <View
-          style={[styles.checkbox, item.completed && styles.checkboxChecked]}
+          style={[
+            styles.checkbox,
+            {
+              borderColor:
+                Colors[colorScheme === "dark" ? "dark" : "light"].text,
+            },
+            item.completed && styles.checkboxChecked,
+          ]}
         >
           {item.completed && <AntDesign name="check" size={16} color="white" />}
         </View>
       </TouchableOpacity>
 
       <View style={styles.itemContent}>
-        <Text
-          style={[styles.itemText, item.completed && styles.itemTextCompleted]}
+        <ThemedText
+          style={[
+            styles.itemText,
+            item.completed && styles.itemTextCompleted,
+            { color: Colors[colorScheme === "dark" ? "dark" : "light"].text },
+          ]}
         >
           {item.name}
-        </Text>
+        </ThemedText>
         <View style={styles.itemDetails}>
-          <Text style={styles.quantityText}>×{item.quantity}</Text>
-          <Text style={styles.priceText}>
+          <ThemedText style={styles.quantityText}>×{item.quantity}</ThemedText>
+          <ThemedText style={styles.priceText}>
             ${(item.price * (item.quantity || 1)).toFixed(2)}
-          </Text>
+          </ThemedText>
         </View>
       </View>
 
@@ -225,88 +245,181 @@ export default function ListDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
+      <ThemedView backgroundColor="background" style={styles.loadingContainer}>
+        <ActivityIndicator
+          size="large"
+          color={Colors[colorScheme === "dark" ? "dark" : "light"].accent}
+        />
+      </ThemedView>
     );
   }
 
   if (!list) {
     return (
-      <View>
-        <Text>List not found</Text>
-      </View>
+      <ThemedView backgroundColor="background" style={styles.container}>
+        <ThemedText>List not found</ThemedText>
+      </ThemedView>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["bottom"]}>
+    <SafeAreaView
+      style={[
+        { flex: 1 },
+        {
+          backgroundColor:
+            Colors[colorScheme === "dark" ? "dark" : "light"].background,
+        },
+      ]}
+      edges={["bottom"]}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
+        style={[
+          styles.container,
+          {
+            backgroundColor:
+              Colors[colorScheme === "dark" ? "dark" : "light"].background,
+          },
+        ]}
         keyboardVerticalOffset={Platform.OS === "ios" ? 88 : 0}
       >
-        <View style={styles.listDetailHeader}>
-          <TouchableOpacity
-            style={styles.dueDateButton}
-            onPress={() => setShowDatePicker(true)}
+        <ThemedView backgroundColor="background" style={styles.container}>
+          <View
+            style={[
+              styles.listDetailHeader,
+              {
+                backgroundColor:
+                  Colors[colorScheme === "dark" ? "dark" : "light"].background,
+              },
+            ]}
           >
-            <Feather name="calendar" size={20} color="#666" />
-            <Text style={styles.dueDateText}>
-              Due: {new Date(list.dueDate).toLocaleDateString()}
-            </Text>
-          </TouchableOpacity>
-          <Text style={styles.totalText}>Total: ${list.total.toFixed(2)}</Text>
-        </View>
-        <View style={styles.topContainer}>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => setShowAddItemModal(true)}
-          >
-            <AntDesign name="plus" size={24} color="white" />
-            <Text style={styles.addButtonText}>Add Item</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              style={[
+                styles.dueDateButton,
+                {
+                  backgroundColor:
+                    Colors[colorScheme === "dark" ? "dark" : "light"].primary,
+                },
+              ]}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Feather
+                name="calendar"
+                size={20}
+                color={Colors[colorScheme === "dark" ? "dark" : "light"].text}
+              />
+              <ThemedText style={styles.dueDateText}>
+                Due: {new Date(list.dueDate).toLocaleDateString()}
+              </ThemedText>
+            </TouchableOpacity>
+            <ThemedText style={styles.totalText}>
+              Total: ${list.total.toFixed(2)}
+            </ThemedText>
+          </View>
 
-        <View style={styles.contentContainer}>
-          <FlatList
-            data={list.items}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.itemId.toString()}
-            style={styles.itemsList}
-            contentContainerStyle={styles.itemsListContent}
+          <View
+            style={[
+              styles.topContainer,
+              {
+                backgroundColor:
+                  Colors[colorScheme === "dark" ? "dark" : "light"].background,
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={[
+                styles.addButton,
+                { backgroundColor: Colors.light.buttonBackground },
+              ]}
+              onPress={() => setShowAddItemModal(true)}
+            >
+              <AntDesign
+                name="plus"
+                size={24}
+                color={
+                  Colors[colorScheme === "dark" ? "dark" : "light"].buttonText
+                }
+              />
+              <ThemedText
+                style={[
+                  styles.addButtonText,
+                  {
+                    color:
+                      Colors[colorScheme === "dark" ? "dark" : "light"]
+                        .buttonText,
+                  },
+                ]}
+              >
+                Add Item
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+
+          <ThemedView
+            backgroundColor="background"
+            style={[
+              styles.contentContainer,
+              {
+                backgroundColor:
+                  Colors[colorScheme === "dark" ? "dark" : "light"].background,
+              },
+            ]}
+          >
+            <FlatList
+              data={list.items}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.itemId.toString()}
+              style={[
+                styles.itemsList,
+                {
+                  backgroundColor:
+                    Colors[colorScheme === "dark" ? "dark" : "light"]
+                      .background,
+                },
+              ]}
+              contentContainerStyle={[
+                styles.itemsListContent,
+                {
+                  backgroundColor:
+                    Colors[colorScheme === "dark" ? "dark" : "light"]
+                      .background,
+                },
+              ]}
+            />
+          </ThemedView>
+
+          <AddItemModal
+            visible={showAddItemModal}
+            onClose={() => setShowAddItemModal(false)}
+            onSubmit={handleAddItem}
+            list={list}
+            existingItems={list?.items.map((item) => item.name) || []}
           />
-        </View>
 
-        <AddItemModal
-          visible={showAddItemModal}
-          onClose={() => setShowAddItemModal(false)}
-          onSubmit={handleAddItem}
-          list={list} // Add this line to pass the list prop
-        />
+          <ListDatePicker
+            visible={showDatePicker}
+            date={new Date(list.dueDate)}
+            onClose={() => setShowDatePicker(false)}
+            onConfirm={(date) => {
+              handleUpdateDueDate(date);
+              setShowDatePicker(false);
+            }}
+          />
 
-        <ListDatePicker
-          visible={showDatePicker}
-          date={new Date(list.dueDate)}
-          onClose={() => setShowDatePicker(false)}
-          onConfirm={(date) => {
-            handleUpdateDueDate(date);
-            setShowDatePicker(false);
-          }}
-        />
-
-        <PriceEditModal
-          visible={showPriceModal}
-          itemName={selectedItem?.name || ""}
-          currentPrice={selectedItem?.price || 0}
-          currentQuantity={selectedItem?.quantity || 1}
-          onConfirm={handleUpdatePriceAndQuantity}
-          onClose={() => {
-            setShowPriceModal(false);
-            setSelectedItem(null);
-          }}
-          list={list} // Add this line
-        />
+          <PriceEditModal
+            visible={showPriceModal}
+            itemName={selectedItem?.name || ""}
+            currentPrice={selectedItem?.price || 0}
+            currentQuantity={selectedItem?.quantity || 1}
+            onConfirm={handleUpdatePriceAndQuantity}
+            onClose={() => {
+              setShowPriceModal(false);
+              setSelectedItem(null);
+            }}
+            list={list}
+          />
+        </ThemedView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

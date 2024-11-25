@@ -5,11 +5,12 @@ import {
   ActivityIndicator,
   ListRenderItem,
 } from "react-native";
-import { ThemedText } from "../components/ThemedText";
-import { ThemedView } from "../components/ThemedView";
+import { ThemedText } from "./ThemedText";
+import { ThemedView } from "./ThemedView";
 import { useTodoContext } from "../hooks/useTodoContext";
 import { analyticsStyles as styles } from "@/styles/analytics.styles";
 import { groceryNormalizer } from "@/utils/groceryNormalizer";
+import { Colors } from "@/constants/Colors";
 
 interface ItemFrequency {
   originalNames: string[];
@@ -33,17 +34,34 @@ const FrequencyItem = memo(({ item }: { item: ItemFrequency }) => {
   };
 
   return (
-    <ThemedView style={styles.itemContainer}>
-      <ThemedText style={styles.itemName}>{item.displayName}</ThemedText>
+    <View style={styles.itemContainer}>
+      <ThemedText
+        style={styles.itemName}
+        lightColor="#1F2937"
+        darkColor="#1F2937"
+        type="subtitle"
+      >
+        {item.displayName}
+      </ThemedText>
 
       {item.originalNames.length > 1 && (
         <View style={styles.variationsContainer}>
           {item.originalNames
             .filter((name) => name !== item.displayName)
             .map((name, idx) => (
-              <View key={idx} style={styles.variationChip}>
-                <ThemedText style={styles.variationChipText}>{name}</ThemedText>
-              </View>
+              <ThemedView
+                key={idx}
+                style={styles.variationChip}
+                backgroundColor="secondary"
+              >
+                <ThemedText
+                  style={styles.variationChipText}
+                  lightColor="#6B7280"
+                  darkColor="#6B7280"
+                >
+                  {name}
+                </ThemedText>
+              </ThemedView>
             ))}
         </View>
       )}
@@ -51,26 +69,58 @@ const FrequencyItem = memo(({ item }: { item: ItemFrequency }) => {
       <View style={styles.divider} />
 
       <View style={styles.statContainer}>
-        <ThemedText style={styles.statLabel}>Purchase Frequency</ThemedText>
-        <ThemedText style={styles.statValue}>
+        <ThemedText
+          style={styles.statLabel}
+          lightColor="#6B7280"
+          darkColor="#6B7280"
+        >
+          Purchase Frequency
+        </ThemedText>
+        <ThemedText
+          style={styles.statValue}
+          lightColor="#1F2937"
+          darkColor="#1F2937"
+          type="defaultSemiBold"
+        >
           {item.count} {item.count === 1 ? "time" : "times"}
         </ThemedText>
       </View>
 
       <View style={styles.priceContainer}>
-        <ThemedText style={styles.priceLabel}>Average Price:</ThemedText>
-        <ThemedText style={styles.priceValue}>
+        <ThemedText
+          style={styles.priceLabel}
+          lightColor="#6B7280"
+          darkColor="#6B7280"
+        >
+          Average Price:
+        </ThemedText>
+        <ThemedText
+          style={styles.priceValue}
+          lightColor={Colors.light.tertiary}
+          darkColor={Colors.light.tertiary}
+          type="defaultSemiBold"
+        >
           {formatPrice(item.averagePrice)}
         </ThemedText>
       </View>
 
       <View style={styles.dateContainer}>
-        <ThemedText style={styles.dateLabel}>Last Purchased:</ThemedText>
-        <ThemedText style={styles.dateValue}>
+        <ThemedText
+          style={styles.dateLabel}
+          lightColor="#6B7280"
+          darkColor="#6B7280"
+        >
+          Last Purchased:
+        </ThemedText>
+        <ThemedText
+          style={styles.dateValue}
+          lightColor="#1F2937"
+          darkColor="#1F2937"
+        >
           {item.lastPurchased.toLocaleDateString()}
         </ThemedText>
       </View>
-    </ThemedView>
+    </View>
   );
 });
 
@@ -179,27 +229,26 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
 
   const ListEmptyComponent = useCallback(
     () => (
-      <View style={styles.emptyContainer}>
-        <ThemedText style={styles.emptyText}>
+      <ThemedView style={styles.emptyContainer}>
+        <ThemedText textColor="text" style={styles.emptyText}>
           No purchase history available yet
         </ThemedText>
-        <ThemedText style={styles.emptyText}>
+        <ThemedText textColor="text" style={styles.emptyText}>
           Complete shopping lists to see analytics
         </ThemedText>
-      </View>
+      </ThemedView>
     ),
     []
   );
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-      </View>
+      <ThemedView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors.light.accent} />
+      </ThemedView>
     );
   }
 
-  // Instead of wrapping FlatList in a View, return it directly
   return !frequencyData || frequencyData.length === 0 ? (
     <ListEmptyComponent />
   ) : (
@@ -208,13 +257,13 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
       renderItem={renderItem}
       keyExtractor={keyExtractor}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={[styles.listContentContainer, { flexGrow: 1 }]}
+      contentContainerStyle={styles.listContentContainer}
       removeClippedSubviews={true}
       maxToRenderPerBatch={10}
       windowSize={5}
       initialNumToRender={10}
-      scrollEnabled={true} // Explicitly enable scrolling
-      nestedScrollEnabled={true} // Enable nested scrolling
+      scrollEnabled={true}
+      nestedScrollEnabled={true}
       style={styles.container}
     />
   );

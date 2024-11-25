@@ -1,4 +1,5 @@
 import { StyleSheet, Platform } from "react-native";
+import { ThemeColors } from "@/constants/Colors";
 
 export const todoListStyles = StyleSheet.create({
   container: {
@@ -36,7 +37,6 @@ export const todoListStyles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     backgroundColor: "white",
-    borderBottomWidth: 1,
     borderBottomColor: "#EEEEEE",
   },
   dueDateButton: {
@@ -54,7 +54,6 @@ export const todoListStyles = StyleSheet.create({
   totalText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#007AFF",
   },
   itemsList: {
     flex: 1,
@@ -91,9 +90,7 @@ export const todoListStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  checkboxChecked: {
-    backgroundColor: "#007AFF",
-  },
+  checkboxChecked: {},
   itemContent: {
     flex: 1,
     flexDirection: "row",
@@ -124,7 +121,6 @@ export const todoListStyles = StyleSheet.create({
   priceText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#007AFF",
     minWidth: 70,
     textAlign: "right",
   },
@@ -136,7 +132,6 @@ export const todoListStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#007AFF",
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
@@ -172,7 +167,6 @@ export const todoListStyles = StyleSheet.create({
   listTotal: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#007AFF",
   },
   dateText: {
     fontSize: 14,
@@ -260,7 +254,6 @@ export const todoListStyles = StyleSheet.create({
     flex: 1,
     padding: 4,
     borderWidth: 1,
-    borderColor: "#007AFF",
     borderRadius: 4,
     marginRight: 8,
   },
@@ -326,11 +319,10 @@ export const todoListStyles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   restoreText: {
-    color: "white",
     fontSize: 14,
     fontWeight: "500",
-    backgroundColor: "blue",
     padding: 14,
     borderRadius: 5,
+    backgroundColor: "#80ED99",
   },
 });

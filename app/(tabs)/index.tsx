@@ -1,16 +1,15 @@
-// app/index.tsx
 import React from "react";
-import { View } from "react-native";
-import TodoListCreator from "@/components/TodoListCreator"; // Updated import
-import { todoListStyles as styles } from "@/styles/todoList.styles";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ThemedView } from "@/components/ThemedView";
+import TodoListCreator from "@/components/TodoListCreator";
+import { todoListStyles as styles } from "@/styles/todoList.styles";
 
 export default function HomeScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
+      <ThemedView backgroundColor="background" style={styles.container}>
         <TodoListCreator />
-      </View>
+      </ThemedView>
     </SafeAreaView>
   );
 }

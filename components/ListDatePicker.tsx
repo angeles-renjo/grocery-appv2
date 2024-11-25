@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import {
   Modal,
-  View,
   TouchableWithoutFeedback,
   TouchableOpacity,
-  Text,
   Platform,
 } from "react-native";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import { listDatePickerStyles as styles } from "@/styles/listDatePicker.styles";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/ThemedText";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { Colors } from "@/constants/Colors";
 
 interface ListDatePickerProps {
   visible: boolean;
@@ -25,8 +27,24 @@ export const ListDatePicker: React.FC<ListDatePickerProps> = ({
   onClose,
   onConfirm,
 }) => {
-  // Keep track of the temporary date selection for Android
   const [tempDate, setTempDate] = useState(initialDate);
+
+  // Get theme colors
+  const backgroundColor = useThemeColor(
+    { light: Colors.light.background, dark: Colors.dark.background },
+    "background"
+  );
+  const buttonColor = useThemeColor(
+    {
+      light: Colors.light.buttonBackground,
+      dark: Colors.dark.buttonBackground,
+    },
+    "buttonBackground"
+  );
+  const textColor = useThemeColor(
+    { light: Colors.light.text, dark: Colors.dark.text },
+    "text"
+  );
 
   // Reset temp date when the picker is opened with a new initial date
   React.useEffect(() => {
@@ -38,15 +56,11 @@ export const ListDatePicker: React.FC<ListDatePickerProps> = ({
     selectedDate?: Date
   ) => {
     if (Platform.OS === "android") {
-      // On Android, hide the picker immediately
       onClose();
-
-      // Only update if the user didn't cancel
       if (event.type === "set" && selectedDate) {
         onConfirm(selectedDate);
       }
     } else {
-      // On iOS, update the temporary date
       if (selectedDate) {
         setTempDate(selectedDate);
       }
@@ -67,36 +81,44 @@ export const ListDatePicker: React.FC<ListDatePickerProps> = ({
         onRequestClose={onClose}
       >
         <TouchableWithoutFeedback onPress={onClose}>
-          <View style={styles.modalOverlay}>
+          <ThemedView style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
-              <View style={styles.modalContent}>
-                <View style={styles.datePickerHeader}>
+              <ThemedView style={styles.modalContent}>
+                <ThemedView style={styles.datePickerHeader}>
                   <TouchableOpacity onPress={onClose}>
-                    <Text style={styles.datePickerButton}>Cancel</Text>
+                    <ThemedText
+                      style={[styles.datePickerButton]}
+                      textColor="buttonBackground"
+                    >
+                      Cancel
+                    </ThemedText>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={handleIOSConfirm}>
-                    <Text
+                    <ThemedText
                       style={[
                         styles.datePickerButton,
                         styles.datePickerDoneButton,
                       ]}
+                      textColor="buttonBackground"
                     >
                       Done
-                    </Text>
+                    </ThemedText>
                   </TouchableOpacity>
-                </View>
-                <View style={{ alignSelf: "center" }}>
+                </ThemedView>
+                <ThemedView style={{ alignSelf: "center" }}>
                   <DateTimePicker
                     value={tempDate}
                     mode="date"
                     display="spinner"
                     onChange={handleDateChange}
-                    textColor="#000000"
+                    textColor={textColor}
+                    // Note: iOS specific styling
+                    accentColor={buttonColor}
                   />
-                </View>
-              </View>
+                </ThemedView>
+              </ThemedView>
             </TouchableWithoutFeedback>
-          </View>
+          </ThemedView>
         </TouchableWithoutFeedback>
       </Modal>
     );
@@ -109,6 +131,10 @@ export const ListDatePicker: React.FC<ListDatePickerProps> = ({
       mode="date"
       display="default"
       onChange={handleDateChange}
+      // Note: Android specific styling
+      themeVariant={
+        backgroundColor === Colors.light.background ? "light" : "dark"
+      }
     />
   ) : null;
 };

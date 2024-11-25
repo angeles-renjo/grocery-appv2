@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import {
   Modal,
-  View,
-  Text,
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -12,13 +10,17 @@ import { AntDesign } from "@expo/vector-icons";
 import { styles } from "@/styles/addItemModal.styles";
 import { TodoList } from "@/utils/types";
 import { groceryNormalizer } from "@/utils/groceryNormalizer";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/ThemedText";
+import { Colors } from "@/constants/Colors";
+import { useColorScheme } from "@/hooks/useColorScheme";
 
 interface AddItemModalProps {
   visible: boolean;
   onClose: () => void;
   onSubmit: (name: string) => void;
   list?: TodoList;
-  existingItems?: string[]; // Add this to check for duplicates
+  existingItems?: string[];
 }
 
 export const AddItemModal = ({
@@ -30,6 +32,7 @@ export const AddItemModal = ({
 }: AddItemModalProps): JSX.Element => {
   const [itemName, setItemName] = useState("");
   const [nameError, setNameError] = useState("");
+  const colorScheme = useColorScheme();
 
   // Handle completed list case
   React.useEffect(() => {
@@ -67,7 +70,6 @@ export const AddItemModal = ({
       return;
     }
 
-    // Submit the original name - normalization will happen in the data layer
     onSubmit(trimmedName);
     setItemName("");
     setNameError("");
@@ -89,7 +91,7 @@ export const AddItemModal = ({
         transparent
         onRequestClose={handleClose}
       >
-        <View />
+        <ThemedView />
       </Modal>
     );
   }
@@ -105,23 +107,45 @@ export const AddItemModal = ({
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.modalContainer}
       >
-        <View style={styles.modalContent}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Add New Item</Text>
+        <ThemedView backgroundColor="background" style={styles.modalContent}>
+          <ThemedView backgroundColor="background" style={styles.header}>
+            <ThemedText type="subtitle">Add New Item</ThemedText>
             <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-              <AntDesign name="close" size={24} color="#666" />
+              <AntDesign
+                name="close"
+                size={24}
+                color={Colors[colorScheme === "dark" ? "dark" : "light"].text}
+              />
             </TouchableOpacity>
-          </View>
+          </ThemedView>
 
-          <View style={styles.inputContainer}>
+          <ThemedView
+            backgroundColor="background"
+            style={styles.inputContainer}
+          >
             <TextInput
-              style={[styles.input, nameError && styles.inputError]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor:
+                    Colors[colorScheme === "dark" ? "dark" : "light"].primary,
+                  color: Colors[colorScheme === "dark" ? "dark" : "light"].text,
+                  borderColor: nameError
+                    ? "#FF4444"
+                    : Colors[colorScheme === "dark" ? "dark" : "light"]
+                        .secondary,
+                },
+                nameError && styles.inputError,
+              ]}
               value={itemName}
               onChangeText={(text) => {
                 setItemName(text);
                 if (nameError) setNameError("");
               }}
               placeholder="Enter item name"
+              placeholderTextColor={
+                Colors[colorScheme === "dark" ? "dark" : "light"].text + "80"
+              }
               autoFocus
               returnKeyType="done"
               onSubmitEditing={handleSubmit}
@@ -133,21 +157,24 @@ export const AddItemModal = ({
               clearButtonMode="while-editing"
             />
             {nameError ? (
-              <Text style={styles.errorText}>{nameError}</Text>
+              <ThemedText style={styles.errorText}>{nameError}</ThemedText>
             ) : null}
-          </View>
+          </ThemedView>
 
-          <View style={styles.footer}>
+          <ThemedView backgroundColor="background" style={styles.footer}>
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={handleClose}
               accessibilityLabel="Cancel adding item"
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <ThemedText style={styles.cancelButtonText}>Cancel</ThemedText>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.addButton,
+                {
+                  backgroundColor: Colors.light.buttonBackground,
+                },
                 list?.isCompleted && styles.disabledButton,
                 !itemName.trim() && styles.disabledButton,
               ]}
@@ -155,7 +182,7 @@ export const AddItemModal = ({
               disabled={list?.isCompleted || !itemName.trim()}
               accessibilityLabel="Add new item"
             >
-              <Text
+              <ThemedText
                 style={[
                   styles.addButtonText,
                   list?.isCompleted && styles.disabledButtonText,
@@ -163,10 +190,10 @@ export const AddItemModal = ({
                 ]}
               >
                 Add Item
-              </Text>
+              </ThemedText>
             </TouchableOpacity>
-          </View>
-        </View>
+          </ThemedView>
+        </ThemedView>
       </KeyboardAvoidingView>
     </Modal>
   );

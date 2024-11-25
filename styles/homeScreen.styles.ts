@@ -1,34 +1,31 @@
+// homeScreen.styles.ts
 import { StyleSheet, Platform } from "react-native";
+import { Colors } from "@/constants/Colors";
 
 export const homeScreenStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
   },
   // Total Section
   totalSection: {
-    backgroundColor: "#FAFAFA",
     paddingHorizontal: 24,
     paddingTop: 24,
     paddingBottom: 20,
   },
   totalLabel: {
     fontSize: 14,
-    color: "#71717A",
     marginBottom: 8,
   },
   totalAmount: {
     fontSize: 28,
     fontWeight: "600",
-    color: "#18181B",
   },
   // Input Section
   inputSection: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "#F4F4F5",
+    borderBottomColor: Colors.light.secondary,
   },
   inputContainer: {
     flexDirection: "row",
@@ -40,12 +37,12 @@ export const homeScreenStyles = StyleSheet.create({
   input: {
     flex: 1,
     height: 42,
-    backgroundColor: "#FFFFFF",
     borderRadius: 8,
     paddingHorizontal: 12,
     fontSize: 14,
-    color: "#18181B",
     marginRight: 8,
+    borderWidth: 1,
+    borderColor: Colors.light.secondary,
     ...Platform.select({
       ios: {
         paddingVertical: 10,
@@ -58,7 +55,6 @@ export const homeScreenStyles = StyleSheet.create({
   dateButton: {
     height: 42,
     paddingHorizontal: 12,
-    backgroundColor: "#FFFFFF",
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
@@ -66,13 +62,11 @@ export const homeScreenStyles = StyleSheet.create({
   },
   dateButtonText: {
     fontSize: 13,
-    color: "#71717A",
   },
   addButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#18181B",
     justifyContent: "center",
     alignItems: "center",
     ...Platform.select({
@@ -88,7 +82,7 @@ export const homeScreenStyles = StyleSheet.create({
     }),
   },
   addButtonIcon: {
-    color: "#FFFFFF",
+    color: Colors.light.background,
   },
   // Lists Section
   listsHeader: {
@@ -97,17 +91,14 @@ export const homeScreenStyles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 24,
     paddingVertical: 12,
-    backgroundColor: "#FAFAFA",
   },
   listsHeaderText: {
     fontSize: 13,
     fontWeight: "500",
-    color: "#71717A",
     letterSpacing: 0.5,
   },
   listContainer: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
   },
   listContent: {
     paddingHorizontal: 16,
@@ -118,17 +109,6 @@ export const homeScreenStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: "#71717A",
-  },
-  // Utility Styles
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
   },
   // Empty State
   emptyContainer: {
@@ -136,61 +116,27 @@ export const homeScreenStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 24,
-    backgroundColor: "#FFFFFF",
   },
-  emptyText: {
-    fontSize: 16,
-    color: "#71717A",
-    textAlign: "center",
-    marginTop: 8,
-  },
-  // Refresh Control
-  refreshControl: {
-    backgroundColor: "transparent",
-  },
-
+  // Toggle Button
   toggleButton: {
     flexDirection: "row",
     alignItems: "center",
     padding: 8,
-    backgroundColor: "#f5f5f5",
     borderRadius: 8,
+    backgroundColor: Colors.light.secondary,
   },
-
   toggleButtonText: {
     fontSize: 14,
-    color: "#666666",
     marginRight: 4,
   },
-
   toggleIcon: {
     marginLeft: 4,
   },
-  // Add to your existing styles
-  historyHeader: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E5E5",
-    marginVertical: 8,
-  },
 
-  historyHeaderText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#18181B",
-  },
-
-  historySubText: {
-    fontSize: 14,
-    color: "#71717A",
-    marginTop: 4,
-  },
-
-  emptySubText: {
-    fontSize: 14,
-    color: "#71717A",
+  emptyText: {
+    fontSize: 16,
     textAlign: "center",
     marginTop: 8,
+    opacity: 0.7, // This gives a subtle fade to the empty state text
   },
 });

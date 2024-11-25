@@ -62,7 +62,6 @@
 │ ├── TodoReducer.ts
 │ └── TodoTypes.ts
 ├─] expo-env.d.ts (ignored)
-├── filestructure.md
 ├── hooks/
 │ ├── useColorScheme.ts
 │ ├── useColorScheme.web.ts
@@ -82,5 +81,6 @@
 │ └── todoList.styles.ts
 ├── tsconfig.json
 └── utils/
+├── groceryNormalizer.ts
 ├── storage.ts
 └── types.ts

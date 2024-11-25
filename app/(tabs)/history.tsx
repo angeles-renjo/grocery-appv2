@@ -1,37 +1,57 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, {
-  FadeIn,
-  // Remove deprecated Layout import
-  LinearTransition, // Use LinearTransition instead
-} from "react-native-reanimated";
+import Animated, { LinearTransition } from "react-native-reanimated";
 import { useTodoContext } from "@/hooks/useTodoContext";
 import { AnimatedList } from "@/components/AnimatedList";
-import { homeScreenStyles as styles } from "@/styles/homeScreen.styles";
+import { historyStyles as styles } from "@/styles/history.styles";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { Colors } from "@/constants/Colors";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/ThemedText";
 
 export default function HistoryScreen() {
   const {
-    state: { lists, loading },
+    state: { lists },
     deleteList,
   } = useTodoContext();
+  const colorScheme = useColorScheme();
 
   // Filter for completed lists only
   const completedLists = lists.filter((list) => list.isCompleted);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          backgroundColor:
+            Colors[colorScheme === "dark" ? "dark" : "light"].background,
+        },
+      ]}
+    >
+      <ThemedView backgroundColor="background" style={styles.container}>
         {/* Header Section */}
-        <View style={styles.historyHeader}>
-          <Text style={styles.historyHeaderText}>Completed Lists</Text>
+        <ThemedView
+          backgroundColor="background"
+          style={[
+            styles.historyHeader,
+            {
+              borderBottomColor:
+                Colors[colorScheme === "dark" ? "dark" : "light"].secondary,
+            },
+          ]}
+        >
+          <ThemedText textColor="text" style={styles.historyHeaderText}>
+            Completed Lists
+          </ThemedText>
           {completedLists.length > 0 && (
-            <Text style={styles.historySubText}>
+            <ThemedText textColor="text" style={styles.historySubText}>
               {completedLists.length} list
               {completedLists.length !== 1 ? "s" : ""}
-            </Text>
+            </ThemedText>
           )}
-        </View>
+        </ThemedView>
 
         {/* Lists Section */}
         <Animated.FlatList
@@ -45,17 +65,21 @@ export default function HistoryScreen() {
           style={styles.listContainer}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
           ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No completed lists yet</Text>
-              <Text style={styles.emptySubText}>
+            <ThemedView
+              backgroundColor="background"
+              style={styles.emptyContainer}
+            >
+              <ThemedText textColor="text" style={styles.emptyText}>
+                No completed lists yet
+              </ThemedText>
+              <ThemedText textColor="text" style={styles.emptySubText}>
                 Lists will appear here when marked as complete
-              </Text>
-            </View>
+              </ThemedText>
+            </ThemedView>
           )}
-          // Replace deprecated Layout.springify() with LinearTransition
           itemLayoutAnimation={LinearTransition.springify()}
         />
-      </View>
+      </ThemedView>
     </SafeAreaView>
   );
 }
