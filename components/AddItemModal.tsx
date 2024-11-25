@@ -17,7 +17,7 @@ interface AddItemModalProps {
   visible: boolean;
   onClose: () => void;
   onSubmit: (name: string) => void;
-  list: TodoList;
+  list?: TodoList; // Made optional
 }
 
 export const AddItemModal = ({
@@ -29,16 +29,16 @@ export const AddItemModal = ({
   const [itemName, setItemName] = useState("");
   const [nameError, setNameError] = useState("");
 
-  // If list is completed, close modal
+  // Handle completed list case
   React.useEffect(() => {
-    if (visible && list.isCompleted) {
+    if (visible && list?.isCompleted) {
       onClose();
     }
-  }, [visible, list.isCompleted]);
+  }, [visible, list?.isCompleted]);
 
   const handleSubmit = () => {
     // Prevent adding items to completed lists
-    if (list.isCompleted) {
+    if (list?.isCompleted) {
       setNameError("Cannot add items to completed lists");
       return;
     }
@@ -50,20 +50,32 @@ export const AddItemModal = ({
       return;
     }
 
+    // Check for maximum length (optional, but recommended)
+    if (trimmedName.length > 100) {
+      setNameError("Item name is too long (maximum 100 characters)");
+      return;
+    }
+
     onSubmit(trimmedName);
     setItemName("");
     setNameError("");
     onClose();
   };
 
+  const handleClose = () => {
+    setItemName("");
+    setNameError("");
+    onClose();
+  };
+
   // Return empty modal if list is completed
-  if (list.isCompleted) {
+  if (list?.isCompleted) {
     return (
       <Modal
         visible={false}
         animationType="slide"
         transparent
-        onRequestClose={onClose}
+        onRequestClose={handleClose}
       >
         <View />
       </Modal>
@@ -75,7 +87,7 @@ export const AddItemModal = ({
       visible={visible}
       animationType="slide"
       transparent
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -84,7 +96,7 @@ export const AddItemModal = ({
         <View style={styles.modalContent}>
           <View style={styles.header}>
             <Text style={styles.title}>Add New Item</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
               <AntDesign name="close" size={24} color="#666" />
             </TouchableOpacity>
           </View>
@@ -101,7 +113,12 @@ export const AddItemModal = ({
               autoFocus
               returnKeyType="done"
               onSubmitEditing={handleSubmit}
-              editable={!list.isCompleted}
+              editable={!list?.isCompleted}
+              maxLength={100}
+              autoCapitalize="sentences"
+              autoCorrect={true}
+              blurOnSubmit={false}
+              clearButtonMode="while-editing"
             />
             {nameError ? (
               <Text style={styles.errorText}>{nameError}</Text>
@@ -109,21 +126,28 @@ export const AddItemModal = ({
           </View>
 
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={handleClose}
+              accessibilityLabel="Cancel adding item"
+            >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.addButton,
-                list.isCompleted && styles.disabledButton,
+                list?.isCompleted && styles.disabledButton,
+                !itemName.trim() && styles.disabledButton,
               ]}
               onPress={handleSubmit}
-              disabled={list.isCompleted}
+              disabled={list?.isCompleted || !itemName.trim()}
+              accessibilityLabel="Add new item"
             >
               <Text
                 style={[
                   styles.addButtonText,
-                  list.isCompleted && styles.disabledButtonText,
+                  list?.isCompleted && styles.disabledButtonText,
+                  !itemName.trim() && styles.disabledButtonText,
                 ]}
               >
                 Add Item

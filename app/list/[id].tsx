@@ -282,6 +282,7 @@ export default function ListDetailScreen() {
           visible={showAddItemModal}
           onClose={() => setShowAddItemModal(false)}
           onSubmit={handleAddItem}
+          list={list} // Add this line to pass the list prop
         />
 
         <ListDatePicker
@@ -304,6 +305,7 @@ export default function ListDetailScreen() {
             setShowPriceModal(false);
             setSelectedItem(null);
           }}
+          list={list} // Add this line
         />
       </KeyboardAvoidingView>
     </SafeAreaView>
