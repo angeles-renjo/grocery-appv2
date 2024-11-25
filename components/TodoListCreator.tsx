@@ -58,16 +58,26 @@ export default function TodoListCreator() {
       handleShake();
       return false;
     }
+
     if (title.length > 50) {
       toast.showToast("List title is too long (max 50 characters)", "warning");
       return false;
     }
-    if (
-      lists.some((list) => list.title.toLowerCase() === title.toLowerCase())
-    ) {
-      toast.showToast("A list with this name already exists", "warning");
+
+    // Only check for duplicates among active (non-completed) lists
+    const isDuplicateActive = lists.some(
+      (list) =>
+        !list.isCompleted && list.title.toLowerCase() === title.toLowerCase()
+    );
+
+    if (isDuplicateActive) {
+      toast.showToast(
+        "An active list with this name already exists",
+        "warning"
+      );
       return false;
     }
+
     return true;
   };
 
