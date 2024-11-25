@@ -5,7 +5,7 @@
 ├── app/
 │ ├── (tabs)/
 │ │ ├── \_layout.tsx
-│ │ ├── explore.tsx
+│ │ ├── analytics.tsx
 │ │ ├── history.tsx
 │ │ └── index.tsx
 │ ├── +not-found.tsx
@@ -35,6 +35,7 @@
 │ ├── ListDatePicker.tsx
 │ ├── ParallaxScrollView.tsx
 │ ├── PriceEditModal.tsx
+│ ├── PurchaseFrequencyAnalytics.tsx
 │ ├── ThemedText.tsx
 │ ├── ThemedView.tsx
 │ ├── TodoListCreator.tsx
@@ -74,6 +75,7 @@
 │ └── reset-project.js
 ├── styles/
 │ ├── addItemModal.styles.ts
+│ ├── analytics.styles.ts
 │ ├── homeScreen.styles.ts
 │ ├── listDatePicker.styles.ts
 │ ├── priceEditModal.styles.ts
