@@ -165,4 +165,11 @@ export const analyticsStyles = StyleSheet.create({
     color: "#1F2937",
     fontWeight: "500",
   },
+  listContentContainer: {
+    flexGrow: 1,
+    paddingBottom: 20, // Add some bottom padding for better scrolling
+  },
+  analyticsContainer: {
+    flex: 1, // This ensures the FlatList can take remaining space
+  },
 });
