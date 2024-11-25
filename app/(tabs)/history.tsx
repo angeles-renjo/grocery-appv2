@@ -1,7 +1,11 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, { Layout, FadeIn } from "react-native-reanimated";
+import Animated, {
+  FadeIn,
+  // Remove deprecated Layout import
+  LinearTransition, // Use LinearTransition instead
+} from "react-native-reanimated";
 import { useTodoContext } from "@/hooks/useTodoContext";
 import { AnimatedList } from "@/components/AnimatedList";
 import { homeScreenStyles as styles } from "@/styles/homeScreen.styles";
@@ -48,7 +52,8 @@ export default function HistoryScreen() {
               </Text>
             </View>
           )}
-          itemLayoutAnimation={Layout.springify()}
+          // Replace deprecated Layout.springify() with LinearTransition
+          itemLayoutAnimation={LinearTransition.springify()}
         />
       </View>
     </SafeAreaView>
