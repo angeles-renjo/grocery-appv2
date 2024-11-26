@@ -3,16 +3,14 @@ import { TodoState, TodoList, TodoItem } from "../../utils/types";
 
 // Helper functions for calculations with quantity support
 const calculateListTotal = (items: TodoItem[]): number => {
-  return items
-    .filter((item) => item.completed) // Only count completed items
-    .reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
+  return items.reduce(
+    (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
+    0
+  );
 };
 
 const calculateGrandTotal = (lists: TodoList[]): number => {
-  // Only include non-completed lists in grand total
-  return lists
-    .filter((list) => !list.isCompleted)
-    .reduce((sum, list) => sum + calculateListTotal(list.items), 0);
+  return lists.reduce((sum, list) => sum + list.total, 0);
 };
 
 const updateListsWithTotals = (lists: TodoList[]): TodoList[] => {
@@ -50,10 +48,11 @@ export const todoReducer = (
         isCompleted: false, // Initialize as not completed
       };
       const updatedLists = [...state.lists, newList];
+      const listsWithTotals = updateListsWithTotals(updatedLists);
       return {
         ...state,
-        lists: updatedLists,
-        grandTotal: calculateGrandTotal(updatedLists),
+        lists: listsWithTotals,
+        grandTotal: calculateGrandTotal(listsWithTotals),
       };
     }
 
@@ -71,10 +70,11 @@ export const todoReducer = (
             }
           : list
       );
+      const listsWithTotals = updateListsWithTotals(updatedLists);
       return {
         ...state,
-        lists: updateListsWithTotals(updatedLists),
-        grandTotal: calculateGrandTotal(updatedLists),
+        lists: listsWithTotals,
+        grandTotal: calculateGrandTotal(listsWithTotals),
       };
     }
 
@@ -88,10 +88,11 @@ export const todoReducer = (
             }
           : list
       );
+      const listsWithTotals = updateListsWithTotals(updatedLists);
       return {
         ...state,
-        lists: updateListsWithTotals(updatedLists),
-        grandTotal: calculateGrandTotal(updatedLists), // Will exclude completed list
+        lists: listsWithTotals,
+        grandTotal: calculateGrandTotal(listsWithTotals),
       };
     }
 
@@ -99,10 +100,11 @@ export const todoReducer = (
       const updatedLists = state.lists.filter(
         (list) => list.listId !== action.payload
       );
+      const listsWithTotals = updateListsWithTotals(updatedLists);
       return {
         ...state,
-        lists: updatedLists,
-        grandTotal: calculateGrandTotal(updatedLists),
+        lists: listsWithTotals,
+        grandTotal: calculateGrandTotal(listsWithTotals),
       };
     }
 
