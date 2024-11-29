@@ -23,6 +23,7 @@ import { ListDatePicker } from "./ListDatePicker";
 import { useTodoContext } from "@/hooks/useTodoContext";
 import { useToast } from "@/context/toast/ToastContext";
 import { AnimatedList } from "@/components/AnimatedList";
+import { TotalComponent } from "@/components/TotalComponent"; // Added new import
 import { homeScreenStyles as styles } from "@/styles/homeScreen.styles";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -157,14 +158,7 @@ export default function TodoListCreator() {
   return (
     <ThemedView backgroundColor="background" style={styles.container}>
       {/* Total Section */}
-      <ThemedView backgroundColor="background" style={styles.totalSection}>
-        <ThemedText type="default" textColor="text" style={styles.totalLabel}>
-          Total Value
-        </ThemedText>
-        <ThemedText type="title" textColor="text" style={styles.totalAmount}>
-          ${grandTotal.toFixed(2)}
-        </ThemedText>
-      </ThemedView>
+      <TotalComponent grandTotal={grandTotal} lists={lists} />
 
       {/* Input Section */}
       <ThemedView backgroundColor="background" style={styles.inputSection}>
