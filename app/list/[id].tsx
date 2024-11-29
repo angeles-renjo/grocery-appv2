@@ -212,7 +212,13 @@ export default function ListDetailScreen() {
             item.completed && styles.checkboxChecked,
           ]}
         >
-          {item.completed && <AntDesign name="check" size={16} color="white" />}
+          {item.completed && (
+            <AntDesign
+              name="check"
+              size={16}
+              color={colorScheme === "dark" ? "white" : "black"}
+            />
+          )}
         </View>
       </TouchableOpacity>
 
