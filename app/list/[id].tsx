@@ -23,6 +23,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
+import { groceryNormalizer } from "@/utils/groceryNormalizer";
 
 interface EditingItem {
   itemId: number;
@@ -79,6 +80,17 @@ export default function ListDetailScreen() {
 
   const handleAddItem = async (name: string) => {
     if (!list) return;
+
+    // Add explicit duplicate check here
+    const isDuplicate = list.items.some((item) =>
+      groceryNormalizer.isSameItem(item.name, name)
+    );
+
+    if (isDuplicate) {
+      showToast("This item already exists in the list", "error");
+      return;
+    }
+
     await addItem(list.listId, name, { quantity: 1, price: 0 });
     setShowAddItemModal(false);
   };
