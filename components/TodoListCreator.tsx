@@ -19,7 +19,6 @@ import Animated, {
   useSharedValue,
   FadeIn,
 } from "react-native-reanimated";
-import { TodoList } from "@/utils/types";
 import { ListDatePicker } from "./ListDatePicker";
 import { useTodoContext } from "@/hooks/useTodoContext";
 import { useToast } from "@/context/toast/ToastContext";
@@ -31,7 +30,6 @@ import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 export default function TodoListCreator() {
-  const router = useRouter();
   const colorScheme = useColorScheme();
   const {
     state: { lists, loading, grandTotal },

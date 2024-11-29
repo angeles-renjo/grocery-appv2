@@ -6,7 +6,6 @@ export const homeScreenStyles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  // Total Section
   totalSection: {
     paddingHorizontal: 24,
     paddingTop: 24,
