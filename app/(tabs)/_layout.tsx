@@ -5,26 +5,36 @@ import { Platform } from "react-native";
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  // Get theme colors using the hook
+  const backgroundColor = useThemeColor({}, "primary");
+  const activeTintColor = useThemeColor({}, "tertiary"); // Using emerald green
+  const inactiveTintColor = useThemeColor({}, "text");
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        // Use proper color system
+        tabBarActiveTintColor: activeTintColor,
+        tabBarInactiveTintColor: inactiveTintColor,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
+        // Additional styling for consistency
+        tabBarStyle: {
+          backgroundColor: backgroundColor,
+          borderTopWidth: 0, // Remove default border
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Lists",
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color, focused }) => (
             <IconSymbol size={28} name="house.fill" color={color} />
           ),
         }}
@@ -33,7 +43,7 @@ export default function TabLayout() {
         name="history"
         options={{
           title: "History",
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color, focused }) => (
             <IconSymbol size={28} name="clock.fill" color={color} />
           ),
         }}
@@ -42,7 +52,7 @@ export default function TabLayout() {
         name="analytics"
         options={{
           title: "Analytics",
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color, focused }) => (
             <IconSymbol size={28} name="chart.bar.fill" color={color} />
           ),
         }}
