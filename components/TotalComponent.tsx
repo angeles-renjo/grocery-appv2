@@ -174,9 +174,8 @@ export function TotalComponent({
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: 8,
     borderRadius: 12,
-    marginBottom: 16,
   },
   totalHeader: {
     marginBottom: 16,
