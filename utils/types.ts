@@ -30,9 +30,9 @@ export interface StorageData {
 
 // Storage Enums
 export enum StorageKeys {
-  ROOT = "@TodoApp",
-  LISTS = "@TodoApp:lists",
-  SETTINGS = "@TodoApp:settings",
+  ROOT = '@TodoApp',
+  LISTS = '@TodoApp:lists',
+  SETTINGS = '@TodoApp:settings',
 }
 
 // Value Objects
@@ -69,7 +69,7 @@ export class ItemId {
 }
 
 // Toast Types
-export type ToastType = "success" | "error" | "info" | "warning";
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface Toast {
   id: string;
@@ -83,8 +83,8 @@ export interface ToastState {
 }
 
 export type ToastAction =
-  | { type: "ADD_TOAST"; payload: Toast }
-  | { type: "REMOVE_TOAST"; payload: string };
+  | { type: 'ADD_TOAST'; payload: Toast }
+  | { type: 'REMOVE_TOAST'; payload: string };
 
 export interface ToastContextType {
   showToast: (message: string, type: ToastType, duration?: number) => void;
@@ -104,3 +104,8 @@ export type ItemUpdate = Partial<{
   quantity: number;
   name: string;
 }>;
+
+export interface ChartDataPoint {
+  value: number;
+  label: string;
+}

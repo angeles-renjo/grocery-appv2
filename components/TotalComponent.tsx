@@ -1,16 +1,16 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState } from 'react';
 import {
   View,
   StyleSheet,
   TouchableOpacity,
   Modal,
   Pressable,
-} from "react-native";
-import { Feather } from "@expo/vector-icons";
-import { ThemedView } from "./ThemedView";
-import { ThemedText } from "./ThemedText";
-import { Colors } from "@/constants/Colors";
-import { TodoList } from "@/utils/types";
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { ThemedView } from './ThemedView';
+import { ThemedText } from './ThemedText';
+import { Colors } from '@/constants/Colors';
+import { TodoList } from '@/utils/types';
 
 interface TotalComponentProps {
   list?: TodoList;
@@ -58,25 +58,25 @@ export function TotalComponent({
   }, [list, grandTotal, lists]);
 
   return (
-    <ThemedView backgroundColor="background" style={styles.container}>
+    <ThemedView backgroundColor='background' style={styles.container}>
       <View style={styles.totalHeader}>
-        <ThemedText type="subtitle" textColor="text">
-          {list ? list.title : "Total Value"}
+        <ThemedText type='subtitle' textColor='text'>
+          {list ? list.title : 'Total Value'}
         </ThemedText>
         <TouchableOpacity
           onPress={() => setShowTooltip(true)}
           style={styles.infoButton}
         >
-          <Feather name="info" size={20} color={Colors.light.accent} />
+          <Feather name='info' size={20} color={Colors.light.accent} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.totalGrid}>
         <View style={styles.totalColumn}>
-          <ThemedText type="default" textColor="text" style={styles.label}>
+          <ThemedText type='default' textColor='text' style={styles.label}>
             Completed
           </ThemedText>
-          <ThemedText type="title" textColor="text" style={styles.amount}>
+          <ThemedText type='title' textColor='text' style={styles.amount}>
             ${totals.completedTotal.toFixed(2)}
           </ThemedText>
         </View>
@@ -84,10 +84,10 @@ export function TotalComponent({
         <View style={styles.divider} />
 
         <View style={styles.totalColumn}>
-          <ThemedText type="default" textColor="text" style={styles.label}>
+          <ThemedText type='default' textColor='text' style={styles.label}>
             Planned
           </ThemedText>
-          <ThemedText type="title" textColor="text" style={styles.amount}>
+          <ThemedText type='title' textColor='text' style={styles.amount}>
             ${totals.plannedTotal.toFixed(2)}
           </ThemedText>
         </View>
@@ -102,7 +102,7 @@ export function TotalComponent({
             ]}
           />
         </View>
-        <ThemedText type="default" textColor="text" style={styles.progressText}>
+        <ThemedText type='default' textColor='text' style={styles.progressText}>
           {totals.completionPercentage.toFixed(1)}% Complete
         </ThemedText>
       </View>
@@ -111,7 +111,7 @@ export function TotalComponent({
       <Modal
         transparent
         visible={showTooltip}
-        animationType="fade"
+        animationType='fade'
         onRequestClose={() => setShowTooltip(false)}
       >
         <Pressable
@@ -119,47 +119,47 @@ export function TotalComponent({
           onPress={() => setShowTooltip(false)}
         >
           <ThemedView
-            backgroundColor="background"
+            backgroundColor='background'
             style={styles.tooltipContainer}
           >
             <View style={styles.tooltipHeader}>
-              <ThemedText type="subtitle" textColor="text">
+              <ThemedText type='subtitle' textColor='text'>
                 Understanding Totals
               </ThemedText>
               <TouchableOpacity
                 onPress={() => setShowTooltip(false)}
                 style={styles.closeButton}
               >
-                <Feather name="x" size={24} color={Colors.light.accent} />
+                <Feather name='x' size={24} color={Colors.light.accent} />
               </TouchableOpacity>
             </View>
 
             <View style={styles.tooltipContent}>
               <ThemedText
-                type="default"
-                textColor="text"
+                type='default'
+                textColor='text'
                 style={styles.tooltipText}
               >
                 • Completed Total: Sum of all checked items
               </ThemedText>
               <ThemedText
-                type="default"
-                textColor="text"
+                type='default'
+                textColor='text'
                 style={styles.tooltipText}
               >
                 • Planned Total: Sum of all items (checked and unchecked)
               </ThemedText>
               <ThemedText
-                type="default"
-                textColor="text"
+                type='default'
+                textColor='text'
                 style={styles.tooltipText}
               >
                 • Progress bar shows the percentage of planned items that have
                 been completed
               </ThemedText>
               <ThemedText
-                type="default"
-                textColor="text"
+                type='default'
+                textColor='text'
                 style={[styles.tooltipText, styles.tooltipNote]}
               >
                 Note: List completion status doesn't affect these calculations
@@ -179,21 +179,21 @@ const styles = StyleSheet.create({
   },
   totalHeader: {
     marginBottom: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   infoButton: {
     padding: 8,
   },
   totalGrid: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 16,
   },
   totalColumn: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
   },
   divider: {
     width: 1,
@@ -206,40 +206,40 @@ const styles = StyleSheet.create({
   },
   amount: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   progressContainer: {
     marginTop: 8,
   },
   progressBackground: {
     height: 8,
-    backgroundColor: Colors.light.secondary + "40",
+    backgroundColor: Colors.light.secondary + '40',
     borderRadius: 4,
-    overflow: "hidden",
+    overflow: 'hidden',
     marginBottom: 4,
   },
   progressFill: {
-    height: "100%",
-    backgroundColor: Colors.light.accent,
+    height: '100%',
+    backgroundColor: Colors.light.tertiary,
     borderRadius: 4,
   },
   progressText: {
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 14,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
   tooltipContainer: {
-    width: "90%",
+    width: '90%',
     maxWidth: 400,
     borderRadius: 12,
     padding: 16,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -249,9 +249,9 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   tooltipHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
   },
   closeButton: {
@@ -266,6 +266,6 @@ const styles = StyleSheet.create({
   tooltipNote: {
     marginTop: 8,
     opacity: 0.7,
-    fontStyle: "italic",
+    fontStyle: 'italic',
   },
 });

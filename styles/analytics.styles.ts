@@ -1,6 +1,6 @@
 // styles/analytics.styles.ts
-import { StyleSheet } from "react-native";
-import { Colors } from "@/constants/Colors";
+import { StyleSheet } from 'react-native';
+import { Colors } from '@/constants/Colors';
 
 export const analyticsStyles = StyleSheet.create({
   safeArea: {
@@ -28,13 +28,13 @@ export const analyticsStyles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingTop: 32,
   },
   // Card will always be white regardless of theme
@@ -43,9 +43,9 @@ export const analyticsStyles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 8,
     margin: 14,
-    backgroundColor: "#FFFFFF", // Always white
+    backgroundColor: '#FFFFFF', // Always white
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -54,8 +54,8 @@ export const analyticsStyles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   variationsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     marginBottom: 12,
     marginTop: -4,
   },
@@ -72,13 +72,13 @@ export const analyticsStyles = StyleSheet.create({
     marginBottom: 8,
   },
   priceContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 4,
   },
   dateContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 4,
   },
   divider: {
@@ -88,38 +88,38 @@ export const analyticsStyles = StyleSheet.create({
   },
   // Text styles - using dark text colors since card is always white
   emptyText: {
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: 8,
   },
   itemName: {
     marginBottom: 8,
-    color: "#1F2937", // Always dark text since background is white
+    color: '#1F2937', // Always dark text since background is white
   },
   variationChipText: {
     fontSize: 12,
-    color: "#6B7280", // Always dark text
+    color: '#6B7280', // Always dark text
   },
   statLabel: {
     marginBottom: 2,
-    color: "#6B7280", // Always dark text
+    color: '#6B7280', // Always dark text
   },
   statValue: {
     marginBottom: 8,
-    color: "#1F2937", // Always dark text
+    color: '#1F2937', // Always dark text
   },
   priceLabel: {
     marginRight: 8,
-    color: "#6B7280", // Always dark text
+    color: '#6B7280', // Always dark text
   },
   priceValue: {
     color: Colors.light.tertiary,
   },
   dateLabel: {
     marginRight: 8,
-    color: "#6B7280", // Always dark text
+    color: '#6B7280', // Always dark text
   },
   dateValue: {
-    color: "#1F2937", // Always dark text
+    color: '#1F2937', // Always dark text
   },
   listContentContainer: {
     flexGrow: 1,
@@ -127,5 +127,48 @@ export const analyticsStyles = StyleSheet.create({
   },
   analyticsContainer: {
     flex: 1,
+  },
+  // Price history specific styles
+  chartContainer: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    margin: 14,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  priceHistoryStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  statBox: {
+    flex: 1,
+    marginHorizontal: 4,
+    padding: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+  },
+  statTitle: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginBottom: 4,
   },
 });

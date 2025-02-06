@@ -1,16 +1,19 @@
-import React, { useEffect, useState, useCallback, memo } from "react";
+// components/PurchaseFrequencyAnalytics.tsx
+import React, { useEffect, useState, useCallback, memo } from 'react';
 import {
   View,
   FlatList,
   ActivityIndicator,
   ListRenderItem,
-} from "react-native";
-import { ThemedText } from "./ThemedText";
-import { ThemedView } from "./ThemedView";
-import { useTodoContext } from "../hooks/useTodoContext";
-import { analyticsStyles as styles } from "@/styles/analytics.styles";
-import { groceryNormalizer } from "@/utils/groceryNormalizer";
-import { Colors } from "@/constants/Colors";
+  Pressable,
+} from 'react-native';
+import { router } from 'expo-router';
+import { ThemedText } from './ThemedText';
+import { ThemedView } from './ThemedView';
+import { useTodoContext } from '../hooks/useTodoContext';
+import { analyticsStyles as styles } from '@/styles/analytics.styles';
+import { groceryNormalizer } from '@/utils/groceryNormalizer';
+import { Colors } from '@/constants/Colors';
 
 interface ItemFrequency {
   originalNames: string[];
@@ -22,107 +25,120 @@ interface ItemFrequency {
   displayName: string;
 }
 
-// Memoized item component for better performance
-const FrequencyItem = memo(({ item }: { item: ItemFrequency }) => {
-  const formatPrice = (price: number): string => {
-    return price.toLocaleString("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  };
+const FrequencyItem = memo(
+  ({
+    item,
+    onPress,
+  }: {
+    item: ItemFrequency;
+    onPress: (item: ItemFrequency) => void;
+  }) => {
+    const formatPrice = (price: number): string => {
+      return price.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    };
 
-  return (
-    <View style={styles.itemContainer}>
-      <ThemedText
-        style={styles.itemName}
-        lightColor="#1F2937"
-        darkColor="#1F2937"
-        type="subtitle"
+    return (
+      <Pressable
+        onPress={() => onPress(item)}
+        style={({ pressed }) => [
+          styles.itemContainer,
+          pressed && { opacity: 0.7 },
+        ]}
       >
-        {item.displayName}
-      </ThemedText>
+        <ThemedText
+          style={styles.itemName}
+          lightColor='#1F2937'
+          darkColor='#1F2937'
+          type='subtitle'
+        >
+          {item.displayName}
+        </ThemedText>
 
-      {item.originalNames.length > 1 && (
-        <View style={styles.variationsContainer}>
-          {item.originalNames
-            .filter((name) => name !== item.displayName)
-            .map((name, idx) => (
-              <ThemedView
-                key={idx}
-                style={styles.variationChip}
-                backgroundColor="secondary"
-              >
-                <ThemedText
-                  style={styles.variationChipText}
-                  lightColor="#6B7280"
-                  darkColor="#6B7280"
+        {item.originalNames.length > 1 && (
+          <View style={styles.variationsContainer}>
+            {item.originalNames
+              .filter((name) => name !== item.displayName)
+              .map((name, idx) => (
+                <ThemedView
+                  key={idx}
+                  style={styles.variationChip}
+                  backgroundColor='secondary'
                 >
-                  {name}
-                </ThemedText>
-              </ThemedView>
-            ))}
+                  <ThemedText
+                    style={styles.variationChipText}
+                    lightColor='#6B7280'
+                    darkColor='#6B7280'
+                  >
+                    {name}
+                  </ThemedText>
+                </ThemedView>
+              ))}
+          </View>
+        )}
+
+        <View style={styles.divider} />
+
+        <View style={styles.statContainer}>
+          <ThemedText
+            style={styles.statLabel}
+            lightColor='#6B7280'
+            darkColor='#6B7280'
+          >
+            Purchase Frequency
+          </ThemedText>
+          <ThemedText
+            style={styles.statValue}
+            lightColor='#1F2937'
+            darkColor='#1F2937'
+            type='defaultSemiBold'
+          >
+            {item.count} {item.count === 1 ? 'time' : 'times'}
+          </ThemedText>
         </View>
-      )}
 
-      <View style={styles.divider} />
+        <View style={styles.priceContainer}>
+          <ThemedText
+            style={styles.priceLabel}
+            lightColor='#6B7280'
+            darkColor='#6B7280'
+          >
+            Average Price:
+          </ThemedText>
+          <ThemedText
+            style={styles.priceValue}
+            lightColor={Colors.light.tertiary}
+            darkColor={Colors.light.tertiary}
+            type='defaultSemiBold'
+          >
+            {formatPrice(item.averagePrice)}
+          </ThemedText>
+        </View>
 
-      <View style={styles.statContainer}>
-        <ThemedText
-          style={styles.statLabel}
-          lightColor="#6B7280"
-          darkColor="#6B7280"
-        >
-          Purchase Frequency
-        </ThemedText>
-        <ThemedText
-          style={styles.statValue}
-          lightColor="#1F2937"
-          darkColor="#1F2937"
-          type="defaultSemiBold"
-        >
-          {item.count} {item.count === 1 ? "time" : "times"}
-        </ThemedText>
-      </View>
-
-      <View style={styles.priceContainer}>
-        <ThemedText
-          style={styles.priceLabel}
-          lightColor="#6B7280"
-          darkColor="#6B7280"
-        >
-          Average Price:
-        </ThemedText>
-        <ThemedText
-          style={styles.priceValue}
-          lightColor={Colors.light.tertiary}
-          darkColor={Colors.light.tertiary}
-          type="defaultSemiBold"
-        >
-          {formatPrice(item.averagePrice)}
-        </ThemedText>
-      </View>
-
-      <View style={styles.dateContainer}>
-        <ThemedText
-          style={styles.dateLabel}
-          lightColor="#6B7280"
-          darkColor="#6B7280"
-        >
-          Last Purchased:
-        </ThemedText>
-        <ThemedText
-          style={styles.dateValue}
-          lightColor="#1F2937"
-          darkColor="#1F2937"
-        >
-          {item.lastPurchased.toLocaleDateString()}
-        </ThemedText>
-      </View>
-    </View>
-  );
-});
+        <View style={styles.dateContainer}>
+          <ThemedText
+            style={styles.dateLabel}
+            lightColor='#6B7280'
+            darkColor='#6B7280'
+          >
+            Last Purchased:
+          </ThemedText>
+          <ThemedText
+            style={styles.dateValue}
+            lightColor='#1F2937'
+            darkColor='#1F2937'
+          >
+            {item.lastPurchased.toLocaleDateString()}
+          </ThemedText>
+        </View>
+      </Pressable>
+    );
+  }
+);
 
 export const PurchaseFrequencyAnalytics: React.FC = () => {
   const [frequencyData, setFrequencyData] = useState<ItemFrequency[]>([]);
@@ -217,9 +233,13 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
     return Object.entries(nameCounts).sort((a, b) => b[1] - a[1])[0][0];
   };
 
+  const handleItemPress = useCallback((item: ItemFrequency) => {
+    router.push(`/analytics/${encodeURIComponent(item.displayName)}`);
+  }, []);
+
   const renderItem: ListRenderItem<ItemFrequency> = useCallback(
-    ({ item }) => <FrequencyItem item={item} />,
-    []
+    ({ item }) => <FrequencyItem item={item} onPress={handleItemPress} />,
+    [handleItemPress]
   );
 
   const keyExtractor = useCallback(
@@ -230,10 +250,10 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
   const ListEmptyComponent = useCallback(
     () => (
       <ThemedView style={styles.emptyContainer}>
-        <ThemedText textColor="text" style={styles.emptyText}>
+        <ThemedText textColor='text' style={styles.emptyText}>
           No purchase history available yet
         </ThemedText>
-        <ThemedText textColor="text" style={styles.emptyText}>
+        <ThemedText textColor='text' style={styles.emptyText}>
           Complete shopping lists to see analytics
         </ThemedText>
       </ThemedView>
@@ -244,7 +264,7 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
   if (isLoading) {
     return (
       <ThemedView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.light.accent} />
+        <ActivityIndicator size='large' color={Colors.light.accent} />
       </ThemedView>
     );
   }
