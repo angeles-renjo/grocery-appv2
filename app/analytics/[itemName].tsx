@@ -1,4 +1,3 @@
-// app/(tabs)/analytics/[itemName].tsx
 import React, { useMemo } from 'react';
 import { View, ScrollView, Dimensions } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -40,7 +39,7 @@ const PriceHistoryScreen = () => {
           acc.push({
             value: item.price || 0,
             label: new Date(list.completedAt).toLocaleDateString(),
-            dataPointText: `$${item.price?.toFixed(2)}`, // Add the price as text
+            dataPointText: `$${item.price?.toFixed(2)}`,
           });
         }
       });
@@ -49,52 +48,112 @@ const PriceHistoryScreen = () => {
     }, []);
   }, [itemName, state.lists]);
 
+  // Add stats calculation from the old version
+  const stats = useMemo(() => {
+    const prices = chartData.map((d) => d.value);
+    return {
+      average: prices.length
+        ? prices.reduce((sum, price) => sum + price, 0) / prices.length
+        : 0,
+      lowest: prices.length ? Math.min(...prices) : 0,
+      highest: prices.length ? Math.max(...prices) : 0,
+    };
+  }, [chartData]);
+
+  const formatPrice = (price: number): string => {
+    return price.toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
+  if (chartData.length === 0) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ThemedView style={styles.container} backgroundColor='background'>
+          <View style={styles.header}>
+            <ThemedText style={styles.headerTitle} type='title'>
+              Price History
+            </ThemedText>
+            <ThemedText style={styles.headerSubtitle} textColor='text'>
+              {decodeURIComponent(itemName as string)}
+            </ThemedText>
+          </View>
+          <View style={styles.emptyContainer}>
+            <ThemedText textColor='text' style={styles.emptyText}>
+              No price history available for this item
+            </ThemedText>
+          </View>
+        </ThemedView>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ThemedView style={styles.container} backgroundColor='background'>
-        <View style={styles.header}>
-          <ThemedText style={styles.headerTitle} type='title'>
-            Price History
-          </ThemedText>
-          <ThemedText style={styles.headerSubtitle} textColor='text'>
-            {decodeURIComponent(itemName as string)}
-          </ThemedText>
-        </View>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.header}>
+            <ThemedText style={styles.headerTitle} type='title'>
+              Price History
+            </ThemedText>
+            <ThemedText style={styles.headerSubtitle} textColor='text'>
+              {decodeURIComponent(itemName as string)}
+            </ThemedText>
+          </View>
 
-        <View style={styles.chartContainer}>
-          <LineChart
-            data={chartData}
-            height={250}
-            overflowTop={30}
-            xAxisLabelsHeight={0}
-            scrollToEnd={true}
-            scrollAnimation={true}
-            dashWidth={0}
-            focusEnabled={true}
-            showDataPointLabelOnFocus={true}
-            showTextOnFocus={true}
-            dataPointsColor1={Colors.light.tertiary}
-            color={Colors.light.secondary}
-            focusedDataPointColor={Colors.light.secondary}
-            textColor={Colors.light.text}
-            textFontSize={14}
-            focusedDataPointWidth={8}
-            focusedDataPointHeight={8}
-            hideDataPoints={false}
-            dataPointsHeight={6}
-            dataPointsWidth={6}
-            textShiftY={-20}
-            textShiftX={0}
-            showValuesAsDataPointsText={true}
+          <View style={styles.chartContainer}>
+            <LineChart
+              data={chartData}
+              height={250}
+              overflowTop={30}
+              xAxisLabelsHeight={0}
+              scrollToEnd={true}
+              scrollAnimation={true}
+              dashWidth={0}
+              focusEnabled={true}
+              showDataPointLabelOnFocus={true}
+              showTextOnFocus={true}
+              dataPointsColor1={Colors.light.tertiary}
+              color={Colors.light.secondary}
+              focusedDataPointColor={Colors.light.secondary}
+              textColor={Colors.light.text}
+              textFontSize={14}
+              focusedDataPointWidth={8}
+              focusedDataPointHeight={8}
+              hideDataPoints={false}
+              dataPointsHeight={6}
+              dataPointsWidth={6}
+              textShiftY={-20}
+              textShiftX={0}
+              showValuesAsDataPointsText={true}
+            />
+          </View>
 
-            // Optional: Add gradient for area under the line
-            // areaChart={true}
-            // startFillColor={Colors.light.secondary}
-            // endFillColor={Colors.light.secondary}
-            // startOpacity={0.2}
-            // endOpacity={0.0}
-          />
-        </View>
+          {/* Add stats container from the old version */}
+          <View style={styles.statsContainer}>
+            <View style={styles.statBox}>
+              <ThemedText style={styles.statTitle}>Average Price</ThemedText>
+              <ThemedText style={styles.statValue}>
+                {formatPrice(stats.average)}
+              </ThemedText>
+            </View>
+            <View style={styles.statBox}>
+              <ThemedText style={styles.statTitle}>Lowest Price</ThemedText>
+              <ThemedText style={styles.statValue}>
+                {formatPrice(stats.lowest)}
+              </ThemedText>
+            </View>
+            <View style={styles.statBox}>
+              <ThemedText style={styles.statTitle}>Highest Price</ThemedText>
+              <ThemedText style={styles.statValue}>
+                {formatPrice(stats.highest)}
+              </ThemedText>
+            </View>
+          </View>
+        </ScrollView>
       </ThemedView>
     </SafeAreaView>
   );
