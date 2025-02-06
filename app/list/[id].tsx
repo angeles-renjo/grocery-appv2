@@ -178,6 +178,7 @@ export default function ListDetailScreen() {
         price: newPrice,
         quantity: newQuantity,
         name: newName,
+        completed: true, // Mark as completed when price is updated
       });
       setShowPriceModal(false);
       setSelectedItem(null);
@@ -191,8 +192,17 @@ export default function ListDetailScreen() {
       showToast('List not found', 'error');
       return;
     }
+
+    // If item is being marked as completed, show price modal first
+    if (!item.completed) {
+      setSelectedItem(item);
+      setShowPriceModal(true);
+      return;
+    }
+
+    // If unchecking, just update the completion status
     await updateItem(list.listId, item.itemId, {
-      completed: !item.completed,
+      completed: false,
     });
   };
 
@@ -218,6 +228,11 @@ export default function ListDetailScreen() {
           {
             backgroundColor:
               Colors[colorScheme === 'dark' ? 'dark' : 'light'].primary,
+            // Add a subtle border in dark mode
+            ...(colorScheme === 'dark' && {
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              borderWidth: 1,
+            }),
           },
         ]}
         onPress={() => handleItemPress(item)}
