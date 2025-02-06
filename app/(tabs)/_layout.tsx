@@ -1,16 +1,17 @@
-import { Tabs } from "expo-router";
-import React from "react";
+import { Tabs } from 'expo-router';
+import React from 'react';
 
-import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import TabBarBackground from "@/components/ui/TabBarBackground";
-import { useThemeColor } from "@/hooks/useThemeColor";
-
+import { HapticTab } from '@/components/HapticTab';
+import TabBarBackground from '@/components/ui/TabBarBackground';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 export default function TabLayout() {
   // Get theme colors using the hook
-  const backgroundColor = useThemeColor({}, "primary");
-  const activeTintColor = useThemeColor({}, "tertiary"); // Using emerald green
-  const inactiveTintColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, 'primary');
+  const activeTintColor = useThemeColor({}, 'tertiary'); // Using emerald green
+  const inactiveTintColor = useThemeColor({}, 'text');
 
   return (
     <Tabs
@@ -29,29 +30,33 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name='index'
         options={{
-          title: "Lists",
+          title: 'Lists',
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <FontAwesome6 name='house' size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="history"
+        name='history'
         options={{
-          title: "History",
+          title: 'History',
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol size={28} name="clock.fill" color={color} />
+            <FontAwesome name='history' size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="analytics"
+        name='analytics'
         options={{
-          title: "Analytics",
+          title: 'Analytics',
           tabBarIcon: ({ color, focused }) => (
-            <IconSymbol size={28} name="chart.bar.fill" color={color} />
+            <MaterialCommunityIcons
+              name='google-analytics'
+              size={24}
+              color={color}
+            />
           ),
         }}
       />
