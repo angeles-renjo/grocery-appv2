@@ -27,20 +27,25 @@ const PriceHistoryScreen = () => {
           new Date(b.completedAt!).getTime()
       );
 
-    // Transform to chart points
+    // Transform to chart points using normalizer
     return completedLists.reduce<ChartDataPoint[]>((acc, list) => {
+      // Find all items that match using the normalizer
       const matchingItems = list.items.filter((item) =>
         groceryNormalizer.isSameItem(item.name, decodedItemName)
       );
 
+      // Add price points for all matching items
       matchingItems.forEach((item) => {
-        acc.push({
-          value: item.price || 0,
-          label: new Date(list.completedAt!).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-          }),
-        });
+        if (list.completedAt) {
+          // TypeScript null check
+          acc.push({
+            value: item.price || 0,
+            label: new Date(list.completedAt).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            }),
+          });
+        }
       });
 
       return acc;
