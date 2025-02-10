@@ -1,23 +1,29 @@
-import React, { useMemo } from 'react';
-import { View, ScrollView, Dimensions } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { LineChart } from 'react-native-gifted-charts';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { useTodoContext } from '@/hooks/useTodoContext';
-import { groceryNormalizer } from '@/utils/groceryNormalizer';
-import { styles } from '@/styles/priceHistory.styles';
-import { Colors } from '@/constants/Colors';
+import React, { useMemo } from "react";
+import { View, ScrollView, Dimensions } from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { LineChart } from "react-native-gifted-charts";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { useTodoContext } from "@/hooks/useTodoContext";
+import { groceryNormalizer } from "@/utils/groceryNormalizer";
+import { styles } from "@/styles/priceHistory.styles";
+import { Colors } from "@/constants/Colors";
 
 const PriceHistoryScreen = () => {
   const { itemName } = useLocalSearchParams();
   const { state } = useTodoContext();
-  const { width: screenWidth } = Dimensions.get('window');
+  const { width: screenWidth } = Dimensions.get("window");
 
   const chartData = useMemo(() => {
     const decodedItemName = decodeURIComponent(itemName as string);
+
+    // Debug logs
+    console.log("Processing data:", {
+      decodedItemName,
+      totalLists: state.lists.length,
+      completedLists: state.lists.filter((l) => l.isCompleted).length,
+    });
 
     const completedLists = state.lists
       .filter((list) => list.isCompleted && list.completedAt)
@@ -30,9 +36,21 @@ const PriceHistoryScreen = () => {
     return completedLists.reduce<
       Array<{ value: number; label: string; dataPointText: string }>
     >((acc, list) => {
-      const matchingItems = list.items.filter((item) =>
-        groceryNormalizer.isSameItem(item.name, decodedItemName)
-      );
+      const matchingItems = list.items.filter((item) => {
+        const isMatch = groceryNormalizer.isSameItem(
+          item.name,
+          decodedItemName
+        );
+        // Debug matching
+        console.log("Matching check:", {
+          listItem: item.name,
+          searchItem: decodedItemName,
+          normalized1: groceryNormalizer.normalize(item.name).normalized,
+          normalized2: groceryNormalizer.normalize(decodedItemName).normalized,
+          isMatch,
+        });
+        return isMatch;
+      });
 
       matchingItems.forEach((item) => {
         if (list.completedAt) {
@@ -48,7 +66,6 @@ const PriceHistoryScreen = () => {
     }, []);
   }, [itemName, state.lists]);
 
-  // Add stats calculation from the old version
   const stats = useMemo(() => {
     const prices = chartData.map((d) => d.value);
     return {
@@ -61,9 +78,9 @@ const PriceHistoryScreen = () => {
   }, [chartData]);
 
   const formatPrice = (price: number): string => {
-    return price.toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return price.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
@@ -72,17 +89,17 @@ const PriceHistoryScreen = () => {
   if (chartData.length === 0) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.container} backgroundColor='background'>
+        <ThemedView style={styles.container} backgroundColor="background">
           <View style={styles.header}>
-            <ThemedText style={styles.headerTitle} type='title'>
+            <ThemedText style={styles.headerTitle} type="title">
               Price History
             </ThemedText>
-            <ThemedText style={styles.headerSubtitle} textColor='text'>
+            <ThemedText style={styles.headerSubtitle} textColor="text">
               {decodeURIComponent(itemName as string)}
             </ThemedText>
           </View>
           <View style={styles.emptyContainer}>
-            <ThemedText textColor='text' style={styles.emptyText}>
+            <ThemedText textColor="text" style={styles.emptyText}>
               No price history available for this item
             </ThemedText>
           </View>
@@ -93,13 +110,13 @@ const PriceHistoryScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ThemedView style={styles.container} backgroundColor='background'>
+      <ThemedView style={styles.container} backgroundColor="background">
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.header}>
-            <ThemedText style={styles.headerTitle} type='title'>
+            <ThemedText style={styles.headerTitle} type="title">
               Price History
             </ThemedText>
-            <ThemedText style={styles.headerSubtitle} textColor='text'>
+            <ThemedText style={styles.headerSubtitle} textColor="text">
               {decodeURIComponent(itemName as string)}
             </ThemedText>
           </View>
@@ -132,7 +149,6 @@ const PriceHistoryScreen = () => {
             />
           </View>
 
-          {/* Add stats container from the old version */}
           <View style={styles.statsContainer}>
             <View style={styles.statBox}>
               <ThemedText style={styles.statTitle}>Average Price</ThemedText>

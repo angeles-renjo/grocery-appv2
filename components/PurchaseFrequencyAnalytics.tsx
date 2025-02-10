@@ -1,19 +1,19 @@
-// components/PurchaseFrequencyAnalytics.tsx
-import React, { useEffect, useState, useCallback, memo } from 'react';
+import React, { useEffect, useState, useCallback, memo, useMemo } from "react";
 import {
   View,
   FlatList,
   ActivityIndicator,
   ListRenderItem,
   Pressable,
-} from 'react-native';
-import { router } from 'expo-router';
-import { ThemedText } from './ThemedText';
-import { ThemedView } from './ThemedView';
-import { useTodoContext } from '../hooks/useTodoContext';
-import { analyticsStyles as styles } from '@/styles/analytics.styles';
-import { groceryNormalizer } from '@/utils/groceryNormalizer';
-import { Colors } from '@/constants/Colors';
+} from "react-native";
+import { router } from "expo-router";
+import { ThemedText } from "./ThemedText";
+import { ThemedView } from "./ThemedView";
+import { useTodoContext } from "../hooks/useTodoContext";
+import { analyticsStyles as styles } from "@/styles/analytics.styles";
+import { groceryNormalizer } from "@/utils/groceryNormalizer";
+import { Colors } from "@/constants/Colors";
+import { TodoList, TodoItem } from "@/utils/types";
 
 interface ItemFrequency {
   originalNames: string[];
@@ -25,6 +25,25 @@ interface ItemFrequency {
   displayName: string;
 }
 
+// Utility functions moved outside component
+const formatPrice = (price: number): string => {
+  return price.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
+const getMostFrequentName = (names: string[]): string => {
+  const nameCounts = names.reduce((acc, name) => {
+    acc[name] = (acc[name] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return Object.entries(nameCounts).sort((a, b) => b[1] - a[1])[0][0];
+};
+
 const FrequencyItem = memo(
   ({
     item,
@@ -32,134 +51,118 @@ const FrequencyItem = memo(
   }: {
     item: ItemFrequency;
     onPress: (item: ItemFrequency) => void;
-  }) => {
-    const formatPrice = (price: number): string => {
-      return price.toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-    };
-
-    return (
-      <Pressable
-        onPress={() => onPress(item)}
-        style={({ pressed }) => [
-          styles.itemContainer,
-          pressed && { opacity: 0.7 },
-        ]}
+  }) => (
+    <Pressable
+      onPress={() => onPress(item)}
+      style={({ pressed }) => [
+        styles.itemContainer,
+        pressed && { opacity: 0.7 },
+      ]}
+    >
+      <ThemedText
+        style={styles.itemName}
+        lightColor="#1F2937"
+        darkColor="#1F2937"
+        type="subtitle"
       >
-        <ThemedText
-          style={styles.itemName}
-          lightColor='#1F2937'
-          darkColor='#1F2937'
-          type='subtitle'
-        >
-          {item.displayName}
-        </ThemedText>
+        {item.displayName}
+      </ThemedText>
 
-        {item.originalNames.length > 1 && (
-          <View style={styles.variationsContainer}>
-            {item.originalNames
-              .filter((name) => name !== item.displayName)
-              .map((name, idx) => (
-                <ThemedView
-                  key={idx}
-                  style={styles.variationChip}
-                  backgroundColor='secondary'
+      {item.originalNames.length > 1 && (
+        <View style={styles.variationsContainer}>
+          {item.originalNames
+            .filter((name) => name !== item.displayName)
+            .map((name, idx) => (
+              <ThemedView
+                key={idx}
+                style={styles.variationChip}
+                backgroundColor="secondary"
+              >
+                <ThemedText
+                  style={styles.variationChipText}
+                  lightColor="#6B7280"
+                  darkColor="#6B7280"
                 >
-                  <ThemedText
-                    style={styles.variationChipText}
-                    lightColor='#6B7280'
-                    darkColor='#6B7280'
-                  >
-                    {name}
-                  </ThemedText>
-                </ThemedView>
-              ))}
-          </View>
-        )}
-
-        <View style={styles.divider} />
-
-        <View style={styles.statContainer}>
-          <ThemedText
-            style={styles.statLabel}
-            lightColor='#6B7280'
-            darkColor='#6B7280'
-          >
-            Purchase Frequency
-          </ThemedText>
-          <ThemedText
-            style={styles.statValue}
-            lightColor='#1F2937'
-            darkColor='#1F2937'
-            type='defaultSemiBold'
-          >
-            {item.count} {item.count === 1 ? 'time' : 'times'}
-          </ThemedText>
+                  {name}
+                </ThemedText>
+              </ThemedView>
+            ))}
         </View>
+      )}
 
-        <View style={styles.priceContainer}>
-          <ThemedText
-            style={styles.priceLabel}
-            lightColor='#6B7280'
-            darkColor='#6B7280'
-          >
-            Average Price:
-          </ThemedText>
-          <ThemedText
-            style={styles.priceValue}
-            lightColor={Colors.light.tertiary}
-            darkColor={Colors.light.tertiary}
-            type='defaultSemiBold'
-          >
-            {formatPrice(item.averagePrice)}
-          </ThemedText>
-        </View>
+      <View style={styles.divider} />
 
-        <View style={styles.dateContainer}>
-          <ThemedText
-            style={styles.dateLabel}
-            lightColor='#6B7280'
-            darkColor='#6B7280'
-          >
-            Last Purchased:
-          </ThemedText>
-          <ThemedText
-            style={styles.dateValue}
-            lightColor='#1F2937'
-            darkColor='#1F2937'
-          >
-            {item.lastPurchased.toLocaleDateString()}
-          </ThemedText>
-        </View>
-      </Pressable>
-    );
-  }
+      <View style={styles.statContainer}>
+        <ThemedText
+          style={styles.statLabel}
+          lightColor="#6B7280"
+          darkColor="#6B7280"
+        >
+          Purchase Frequency
+        </ThemedText>
+        <ThemedText
+          style={styles.statValue}
+          lightColor="#1F2937"
+          darkColor="#1F2937"
+          type="defaultSemiBold"
+        >
+          {item.count} {item.count === 1 ? "time" : "times"}
+        </ThemedText>
+      </View>
+
+      <View style={styles.priceContainer}>
+        <ThemedText
+          style={styles.priceLabel}
+          lightColor="#6B7280"
+          darkColor="#6B7280"
+        >
+          Average Price:
+        </ThemedText>
+        <ThemedText
+          style={styles.priceValue}
+          lightColor={Colors.light.tertiary}
+          darkColor={Colors.light.tertiary}
+          type="defaultSemiBold"
+        >
+          {formatPrice(item.averagePrice)}
+        </ThemedText>
+      </View>
+
+      <View style={styles.dateContainer}>
+        <ThemedText
+          style={styles.dateLabel}
+          lightColor="#6B7280"
+          darkColor="#6B7280"
+        >
+          Last Purchased:
+        </ThemedText>
+        <ThemedText
+          style={styles.dateValue}
+          lightColor="#1F2937"
+          darkColor="#1F2937"
+        >
+          {item.lastPurchased.toLocaleDateString()}
+        </ThemedText>
+      </View>
+    </Pressable>
+  )
 );
 
 export const PurchaseFrequencyAnalytics: React.FC = () => {
-  const [frequencyData, setFrequencyData] = useState<ItemFrequency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { state } = useTodoContext();
 
-  useEffect(() => {
-    calculateFrequency();
-  }, [state.lists]);
-
-  const calculateFrequency = () => {
+  const frequencyData = useMemo(() => {
     const itemFrequencyMap = new Map<string, ItemFrequency>();
 
     // Process only completed lists
     const completedLists = state.lists.filter((list) => list.isCompleted);
 
     completedLists.forEach((list) => {
-      if (!list.items) return; // Skip if no items
+      if (!list.items) return;
 
       list.items.forEach((item) => {
-        if (!item.name) return; // Skip if no name
+        if (!item.name) return;
 
         const normalizedResult = groceryNormalizer.normalize(item.name);
         const normalizedName = normalizedResult.normalized;
@@ -171,7 +174,6 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
         const existingItem = itemFrequencyMap.get(normalizedName);
 
         if (existingItem) {
-          // Update existing item
           const uniqueOriginalNames = new Set(existingItem.originalNames);
           uniqueOriginalNames.add(item.name);
 
@@ -191,7 +193,6 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
             displayName: existingItem.displayName,
           });
         } else {
-          // Create new item entry
           itemFrequencyMap.set(normalizedName, {
             originalNames: [item.name],
             count: 1,
@@ -205,33 +206,20 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
       });
     });
 
-    // Convert to array and sort by frequency
-    const sortedFrequency = Array.from(itemFrequencyMap.values())
+    return Array.from(itemFrequencyMap.values())
       .sort((a, b) => {
-        // First sort by count (descending)
-        if (b.count !== a.count) {
-          return b.count - a.count;
-        }
-        // Then by last purchased date (most recent first)
+        if (b.count !== a.count) return b.count - a.count;
         return b.lastPurchased.getTime() - a.lastPurchased.getTime();
       })
       .map((item) => ({
         ...item,
         displayName: getMostFrequentName(item.originalNames),
       }));
+  }, [state.lists]);
 
-    setFrequencyData(sortedFrequency);
+  useEffect(() => {
     setIsLoading(false);
-  };
-
-  const getMostFrequentName = (names: string[]): string => {
-    const nameCounts = names.reduce((acc, name) => {
-      acc[name] = (acc[name] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    return Object.entries(nameCounts).sort((a, b) => b[1] - a[1])[0][0];
-  };
+  }, [frequencyData]);
 
   const handleItemPress = useCallback((item: ItemFrequency) => {
     router.push(`/analytics/${encodeURIComponent(item.displayName)}`);
@@ -250,10 +238,10 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
   const ListEmptyComponent = useCallback(
     () => (
       <ThemedView style={styles.emptyContainer}>
-        <ThemedText textColor='text' style={styles.emptyText}>
+        <ThemedText textColor="text" style={styles.emptyText}>
           No purchase history available yet
         </ThemedText>
-        <ThemedText textColor='text' style={styles.emptyText}>
+        <ThemedText textColor="text" style={styles.emptyText}>
           Complete shopping lists to see analytics
         </ThemedText>
       </ThemedView>
@@ -264,7 +252,7 @@ export const PurchaseFrequencyAnalytics: React.FC = () => {
   if (isLoading) {
     return (
       <ThemedView style={styles.loadingContainer}>
-        <ActivityIndicator size='large' color={Colors.light.accent} />
+        <ActivityIndicator size="large" color={Colors.light.accent} />
       </ThemedView>
     );
   }
